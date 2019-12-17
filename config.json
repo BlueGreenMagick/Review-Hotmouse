@@ -1,0 +1,11 @@
+{
+    "q_wheel_down": "show_ans",
+    "a_click_right": "undo",
+    "q_click_right": "undo",
+    "a_wheel_up": "again",
+    "a_wheel_down": "good",
+    "a_click_middle-wheel_up": "easy",
+    "a_click_middle-wheel_down": "hard",
+    "threshold_angle": 15,
+    "threshold_wheel_ms": 500
+}
