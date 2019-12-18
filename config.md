@@ -1,8 +1,8 @@
 **Card side**
-q : it will work when viewing question
-a : it will work when viewing answers
+q : works when viewing question
+a : works when viewing answers
 
-**mouse buttons**
+**mouse buttons (press/click)**
 
 left
 right
@@ -17,18 +17,18 @@ down
 
 **input type**
 
-click
-wheel
+press : Buttons being pressed when triggered. 'press' only hotmouse is triggered upon the first release of a button.
+click : Triggered when the button is pressed.
+wheel : Scrolling inputs.
 
 **multi inputs**
 
-When 2+ inputs are combined to make a shortcut, click and longclick are not distinguished.
-When using combined click and wheel input, it is recommended to click, *then* scroll.
-wheel action must be at last.
+When 2+ inputs are combined to make a shortcut, the order of input type must be press -> click -> wheel, and for multiple 'press', the order of mouse buttons. There can only be one 'click' and one 'wheel' maximum.
 
 **action**
 
 undo
+off
 again
 hard
 good
@@ -46,11 +46,12 @@ blue
 audio : replay audio
 record_voice
 replay_voice
+context_menu : 'copy' context menu.
 
-
-syntax:
+**syntax**:
 
 \[q/a\]_\[type\]\_\[button/wheel\]
 \[q/a\]_\[type\]\_\[button\]-\[type\]\_\[button/wheel\]
-\[q/a\]_\[type\]\_\[button\]-\[type\]\_\[button\]-\[type\]\_\[button/wheel\]
-etc
+\[q/a\]_\[type\]\_\[button\]-\[\]\_\[button\]-\[type\]\_\[button/wheel\]
+
+view examples at https://github.com/BlueGreenMagick/Hotmouse-Review

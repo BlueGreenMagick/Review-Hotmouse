@@ -4,11 +4,28 @@ from aqt import mw
 from aqt.qt import QEvent, Qt
 from aqt.webview import AnkiWebView
 from anki.hooks import addHook, wrap
-from aqt.utils import tooltip, showInfo
+from aqt.utils import tooltip
 
 config = mw.addonManager.getConfig(__name__)
 
+ON = True
+
+def turn_on():
+    global ON
+    if ON == False:
+        ON = True
+        tooltip("Enabled hotmouse")
+
+def turn_off():
+    global ON
+    if ON == True:
+        ON = False
+        tooltip("Disabled hotmouse")
+
 ACTIONS = { #need to seperate actions that only works in Answer side, and those that works in both question and answer
+    "<none>": lambda: None,
+    "": lambda: None,
+    "off": turn_off,
     "undo": mw.onUndo,
     "show_ans": mw.reviewer._getTypedAnswer,
     "again": lambda: mw.reviewer._answerCard(1),
@@ -28,10 +45,8 @@ ACTIONS = { #need to seperate actions that only works in Answer side, and those 
     "audio": mw.reviewer.replayAudio,
     "record_voice": mw.reviewer.onRecordVoice,
     "replay_voice": mw.reviewer.onReplayRecorded,
-    "<none>": lambda: None,
-    "": lambda: None
+    "context_menu": lambda x=None: mw.web.contextMenuEvent(x)
 }
-
 
 BUTTONS = {
     "left": Qt.LeftButton,
@@ -40,9 +55,8 @@ BUTTONS = {
     "xbutton1": Qt.XButton1,
     "xbutton2": Qt.XButton2
 }
+BUTTONS_INVERSE = {v: k for k, v in BUTTONS.items()}
 
-
-last_scroll_time = datetime.datetime.now()
 ignore_release = False
 
 def get_pressed_buttons(qbuttons):
@@ -52,7 +66,7 @@ def get_pressed_buttons(qbuttons):
             buttons.append(b)
     return buttons
 
-def mouse_shortcut(btns, wheel = 0):
+def mouse_shortcut(btns, wheel = 0, click=None):
 
     #build shortcut string
     if mw.reviewer.state == "question":
@@ -60,49 +74,55 @@ def mouse_shortcut(btns, wheel = 0):
     elif mw.reviewer.state == "answer":
         shortcut_key_str = "a_"
     for btn in btns:
-        for b in BUTTONS:
-            if b == btn:
-                shortcut_key_str += "click_{}_".format(b)
-                break
+        shortcut_key_str += "press_{}_".format(btn)
+    if click:
+        shortcut_key_str += "click_{}_".format(click)
     if wheel == 1:
         shortcut_key_str += "wheel_up_"
     elif wheel == -1:
         shortcut_key_str += "wheel_down_"
     shortcut_key_str = shortcut_key_str[:-1] #removes '_' at the end
-    tooltip(shortcut_key_str)
+    #tooltip(shortcut_key_str)
 
     #check if shortcut exist, run designated action if it does
     if shortcut_key_str in config:
         action_str = config[shortcut_key_str]
         ACTIONS[action_str]()
 
-def on_mouse_press(event):
+def on_mouse_press(event): #click
+    btns = get_pressed_buttons(event.buttons())
+    pressed = BUTTONS_INVERSE[event.button()]
+    btns.remove(pressed)
+    mouse_shortcut(btns, click=pressed)
     return
 
-def on_mouse_release(event):
+def on_mouse_release(event): #press
     global ignore_release
     btns = get_pressed_buttons(event.buttons())
+    pressed = BUTTONS_INVERSE[event.button()]
+    btns.append(pressed)
     if ignore_release == False:
         mouse_shortcut(btns)
         ignore_release = True
-    if len(btns) == 0:
+    if len(btns) == 1: #released all mouse buttons
         ignore_release = False
     return
 
 def on_mouse_scroll(event):
     global last_scroll_time
-    if mw.state == "review":
-        curr_time = datetime.datetime.now()
-        time_diff = curr_time - last_scroll_time
-        if time_diff.total_seconds()*1000 > config["threshold_wheel_ms"]:
-            qbtns = event.buttons()
-            btns = get_pressed_buttons(qbtns)
-            angle_delta = event.angleDelta().y()
-            if angle_delta > config["threshold_angle"]:
-                mouse_shortcut(btns, 1)
-            elif angle_delta < -1 * config["threshold_angle"]:
-                mouse_shortcut(btns, -1)
-        last_scroll_time = curr_time
+    global ignore_release
+    curr_time = datetime.datetime.now()
+    time_diff = curr_time - last_scroll_time
+    if time_diff.total_seconds()*1000 > config["threshold_wheel_ms"]:
+        qbtns = event.buttons()
+        btns = get_pressed_buttons(qbtns)
+        angle_delta = event.angleDelta().y()
+        if angle_delta > config["threshold_angle"]:
+            mouse_shortcut(btns, 1)
+        elif angle_delta < -1 * config["threshold_angle"]:
+            mouse_shortcut(btns, -1)
+    last_scroll_time = curr_time
+    ignore_release = True
 
 #Because MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets. 
 def on_child_event(self, event, _old=lambda s,e: None):
@@ -112,7 +132,8 @@ def on_child_event(self, event, _old=lambda s,e: None):
     return _old(self, event)
 
 def event_filter(self, obj, event, _old=lambda s,o,e: None):
-    if mw.state == "review":
+    global ON
+    if mw.state == "review" and ON == True:
         if event.type() == QEvent.MouseButtonPress:
             on_mouse_press(event)
         elif event.type() == QEvent.MouseButtonRelease:
@@ -127,8 +148,21 @@ def add_event_filter_children(obj):
 
 
 def on_wheel(self, event, _old=lambda s, e: None):
-    on_mouse_scroll(event)
+    global ON
+    if mw.state == "review" and ON == True:
+        on_mouse_scroll(event)
     return _old(self, event)
+
+def new_contextMenuEvent(self, i, _old):
+    global ON
+    if mw.state == "review" and ON == True:
+        return
+    else:
+        _old(self, i)
+
+def addTurnonAddon(self, m):
+    a = m.addAction(_("Enable Hotmouse"))
+    a.triggered.connect(turn_on)
 
 
 def onProfileLoaded():
@@ -144,6 +178,9 @@ def onProfileLoaded():
         AnkiWebView.childEvent = wrap(AnkiWebView.childEvent, on_child_event, "around")
     except TypeError:
         AnkiWebView.childEvent = on_child_event
+    AnkiWebView.contextMenuEvent = wrap(AnkiWebView.contextMenuEvent, new_contextMenuEvent, "around")
     add_event_filter_children(mw.web)
 
+last_scroll_time = datetime.datetime.now()
 addHook("profileLoaded", onProfileLoaded)
+addHook("AnkiWebView.contextMenuEvent", addTurnonAddon)
