@@ -12,12 +12,12 @@ A hotmouse only works when in review mode. You can set different hotmouses for f
 
 By default, the hotmouses are configured as below:
 
-right click: undo
-scroll down (front): show answer
-scroll up (back): again
-scroll down (back): good
-middle button + scroll up (back): hard
-middle button + scroll down (back): easy
+right click: undo \
+scroll down (front): show answer \
+scroll up (back): again \
+scroll down (back): good \
+middle button + scroll up (back): hard \
+middle button + scroll down (back): easy \
 left click + right click (left click first): disable hotkey
 
 When disabled, right click and the button 'enable hotmouse' pops out.
@@ -28,5 +28,5 @@ You can customize all hotmouses and its linked actions in the config. There are 
 
 #### Example
 
-`"q_press_left_click_right": "off"` : activates upon pressing right button(`click_right`), if on front side(`q`) and left button is pressed. (`press_left`)
-`"a_press_xbutton1_wheel_down": "hard",`: activates upon scrolling the wheel downward(`wheel_down`), if on back side(`a`), xbutton1 button is pressed(`press_xbutton1`), and middle button is pressed(`press_middle`)
+`"q_press_left_click_right": "off"` : activates upon pressing right button(`click_right`), if on front side(`q`) and left button is pressed. (`press_left`) \
+`"a_press_middle_press_xbutton1_wheel_down": "hard"` : activates upon scrolling the wheel downward(`wheel_down`), if on back side(`a`), xbutton1 button is pressed(`press_xbutton1`), and middle button is pressed(`press_middle`)
