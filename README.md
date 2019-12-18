@@ -1,4 +1,4 @@
-# Hotmouse Review
+# Review Hotmouse
 
 This is an Anki addon, that lets you review with a mouse. (No more keyboards)
 
