@@ -45,7 +45,7 @@ ACTIONS = { #need to seperate actions that only works in Answer side, and those 
     "audio": mw.reviewer.replayAudio,
     "record_voice": mw.reviewer.onRecordVoice,
     "replay_voice": mw.reviewer.onReplayRecorded,
-    "context_menu": lambda x=None: mw.web.contextMenuEvent(x)
+    "context_menu": lambda x="hotmouse_review": mw.web.contextMenuEvent(x)
 }
 
 BUTTONS = {
@@ -59,10 +59,12 @@ BUTTONS_INVERSE = {v: k for k, v in BUTTONS.items()}
 
 ignore_release = False
 
-def get_pressed_buttons(qbuttons):
+def get_pressed_buttons(qbuttons, btn = None):
     buttons = []
     for b in BUTTONS:
         if qbuttons & BUTTONS[b]:
+            buttons.append(b)
+        elif btn and btn == BUTTONS[b]:
             buttons.append(b)
     return buttons
 
@@ -94,14 +96,16 @@ def on_mouse_press(event): #click
     btns = get_pressed_buttons(event.buttons())
     pressed = BUTTONS_INVERSE[event.button()]
     btns.remove(pressed)
+    if len(btns) == 0:
+        ignore_release = False #because sometimes it is not set to True on release
     mouse_shortcut(btns, click=pressed)
     return
 
 def on_mouse_release(event): #press
     global ignore_release
-    btns = get_pressed_buttons(event.buttons())
-    pressed = BUTTONS_INVERSE[event.button()]
-    btns.append(pressed)
+    btns = event.buttons() 
+    btn = event.button()
+    btns = get_pressed_buttons(btns, btn)
     if ignore_release == False:
         mouse_shortcut(btns)
         ignore_release = True
@@ -127,7 +131,7 @@ def on_mouse_scroll(event):
 
 #Because MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets. 
 def on_child_event(self, event, _old=lambda s,e: None):
-    tooltip("child")
+    #tooltip("child")
     if event.added():
         event.child().installEventFilter(self)
     return _old(self, event)
@@ -156,7 +160,7 @@ def on_wheel(self, event, _old=lambda s, e: None):
 
 def new_contextMenuEvent(self, i, _old):
     global ON
-    if mw.state == "review" and ON == True:
+    if mw.state == "review" and ON == True and i != "hotmouse_review":
         return
     else:
         _old(self, i)
