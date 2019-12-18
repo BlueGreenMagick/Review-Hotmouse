@@ -88,6 +88,7 @@ def mouse_shortcut(btns, wheel = 0, click=None):
     if shortcut_key_str in config:
         action_str = config[shortcut_key_str]
         ACTIONS[action_str]()
+        #tooltip(action_str)
 
 def on_mouse_press(event): #click
     btns = get_pressed_buttons(event.buttons())
