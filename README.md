@@ -29,4 +29,4 @@ You can customize all hotmouses and its linked actions in the config. There are 
 #### Example
 
 `"q_press_left_click_right": "off"` : activates upon pressing right button(`click_right`), if on front side(`q`) and left button is pressed. (`press_left`) \
-`"a_press_xbutton1_wheel_down": "hard"` : activates upon scrolling the wheel downward(`wheel_down`), if on back side(`a`), xbutton1 button is pressed(`press_xbutton1`), and middle button is pressed(`press_middle`)
+`"a_press_middle_press_xbutton1_wheel_down": "hard"` : activates upon scrolling the wheel downward(`wheel_down`), if on back side(`a`), xbutton1 button is pressed(`press_xbutton1`), and middle button is pressed(`press_middle`)
