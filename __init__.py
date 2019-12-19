@@ -22,6 +22,28 @@ def turn_off():
         ON = False
         tooltip("Disabled hotmouse")
 
+def answer_hard():
+    cnt = mw.col.sched.answerButtons(mw.reviewer.card)
+    if cnt == 4:
+        mw.reviewer._answerCard(2)
+
+def answer_good():
+    cnt = mw.col.sched.answerButtons(mw.reviewer.card)
+    if cnt == 2:
+        mw.reiewer._answerCard(2)
+    elif cnt == 3:
+        mw.reiewer._answerCard(2)
+    elif cnt == 4:
+        mw.reiewer._answerCard(3)
+
+def answer_easy():
+    cnt = mw.col.sched.answerButtons(mw.reviewer.card)
+    if cnt == 3:
+        mw.reviewer._answerCard(3)
+    elif cnt == 4:
+        mw.reviewer._naswerCard(4)
+
+
 ACTIONS = {
     "<none>": lambda: None,
     "": lambda: None,
@@ -29,9 +51,9 @@ ACTIONS = {
     "undo": mw.onUndo,
     "show_ans": mw.reviewer._getTypedAnswer,
     "again": lambda: mw.reviewer._answerCard(1),
-    "hard": lambda: mw.reviewer._answerCard(2),
-    "good": lambda: mw.reviewer._answerCard(3),
-    "easy": lambda: mw.reviewer._answerCard(4),
+    "hard": answer_hard,
+    "good": answer_good,
+    "easy": answer_easy,
     "delete": mw.reviewer.onDelete,
     "suspend_card": mw.reviewer.onSuspendCard,
     "suspend_note": mw.reviewer.onSuspend,
