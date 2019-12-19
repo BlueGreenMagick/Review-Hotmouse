@@ -167,8 +167,9 @@ def new_contextMenuEvent(self, i, _old):
         _old(self, i)
 
 def addTurnonAddon(self, m):
-    a = m.addAction(_("Enable Hotmouse"))
-    a.triggered.connect(turn_on)
+    if mw.state == "review" and ON == False:
+        a = m.addAction(_("Enable Hotmouse"))
+        a.triggered.connect(turn_on)
 
 
 def onProfileLoaded():
