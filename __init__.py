@@ -84,7 +84,7 @@ def mouse_shortcut(btns, wheel = 0, click=None):
     elif wheel == -1:
         shortcut_key_str += "wheel_down_"
     shortcut_key_str = shortcut_key_str[:-1] #removes '_' at the end
-    #tooltip(shortcut_key_str)
+    tooltip(shortcut_key_str)
 
     #check if shortcut exist, run designated action if it does
     if shortcut_key_str in config:
@@ -114,8 +114,7 @@ def on_mouse_release(event): #press
     return
 
 def on_mouse_scroll(event):
-    global last_scroll_time
-    global ignore_release
+    global last_scroll_time, ignore_release
     curr_time = datetime.datetime.now()
     time_diff = curr_time - last_scroll_time
     if time_diff.total_seconds()*1000 > config["threshold_wheel_ms"]:
@@ -154,7 +153,9 @@ def add_event_filter_children(obj):
 
 def on_wheel(self, event, _old=lambda s, e: None):
     global ON
+    global ignore_release
     if mw.state == "review" and ON == True:
+        ignore_release = True
         on_mouse_scroll(event)
     return _old(self, event)
 
