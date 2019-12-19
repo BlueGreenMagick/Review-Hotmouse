@@ -7,8 +7,8 @@ from anki.hooks import addHook, wrap
 from aqt.utils import tooltip
 
 config = mw.addonManager.getConfig(__name__)
-
 ON = True
+ignore_release = False
 
 def turn_on():
     global ON
@@ -22,7 +22,7 @@ def turn_off():
         ON = False
         tooltip("Disabled hotmouse")
 
-ACTIONS = { #need to seperate actions that only works in Answer side, and those that works in both question and answer
+ACTIONS = {
     "<none>": lambda: None,
     "": lambda: None,
     "off": turn_off,
@@ -55,9 +55,8 @@ BUTTONS = {
     "xbutton1": Qt.XButton1,
     "xbutton2": Qt.XButton2
 }
-BUTTONS_INVERSE = {v: k for k, v in BUTTONS.items()}
 
-ignore_release = False
+BUTTONS_INVERSE = {v: k for k, v in BUTTONS.items()}
 
 def get_pressed_buttons(qbuttons, btn = None):
     buttons = []
@@ -69,7 +68,6 @@ def get_pressed_buttons(qbuttons, btn = None):
     return buttons
 
 def mouse_shortcut(btns, wheel = 0, click=None):
-
     #build shortcut string
     if mw.reviewer.state == "question":
         shortcut_key_str = "q_"
@@ -84,7 +82,7 @@ def mouse_shortcut(btns, wheel = 0, click=None):
     elif wheel == -1:
         shortcut_key_str += "wheel_down_"
     shortcut_key_str = shortcut_key_str[:-1] #removes '_' at the end
-    tooltip(shortcut_key_str)
+    #tooltip(shortcut_key_str)
 
     #check if shortcut exist, run designated action if it does
     if shortcut_key_str in config:
@@ -130,7 +128,6 @@ def on_mouse_scroll(event):
 
 #Because MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets. 
 def on_child_event(self, event, _old=lambda s,e: None):
-    #tooltip("child")
     if event.added():
         event.child().installEventFilter(self)
     return _old(self, event)
@@ -150,10 +147,8 @@ def add_event_filter_children(obj):
         w.installEventFilter(mw.web)
         add_event_filter_children(w)
 
-
 def on_wheel(self, event, _old=lambda s, e: None):
-    global ON
-    global ignore_release
+    global ON, ignore_release
     if mw.state == "review" and ON == True:
         ignore_release = True
         on_mouse_scroll(event)
@@ -170,7 +165,6 @@ def addTurnonAddon(self, m):
     if mw.state == "review" and ON == False:
         a = m.addAction(_("Enable Hotmouse"))
         a.triggered.connect(turn_on)
-
 
 def onProfileLoaded():
     try:
