@@ -122,9 +122,9 @@ def on_mouse_scroll(event):
         qbtns = event.buttons()
         btns = get_pressed_buttons(qbtns)
         angle_delta = event.angleDelta().y()
-        if angle_delta > config["threshold_angle"]:
+        if angle_delta > 0:
             mouse_shortcut(btns, 1)
-        elif angle_delta < -1 * config["threshold_angle"]:
+        elif angle_delta < 0:
             mouse_shortcut(btns, -1)
     last_scroll_time = curr_time
     ignore_release = True
