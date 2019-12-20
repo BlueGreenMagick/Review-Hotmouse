@@ -30,18 +30,18 @@ def answer_hard():
 def answer_good():
     cnt = mw.col.sched.answerButtons(mw.reviewer.card)
     if cnt == 2:
-        mw.reiewer._answerCard(2)
+        mw.reviewer._answerCard(2)
     elif cnt == 3:
-        mw.reiewer._answerCard(2)
+        mw.reviewer._answerCard(2)
     elif cnt == 4:
-        mw.reiewer._answerCard(3)
+        mw.reviewer._answerCard(3)
 
 def answer_easy():
     cnt = mw.col.sched.answerButtons(mw.reviewer.card)
     if cnt == 3:
         mw.reviewer._answerCard(3)
     elif cnt == 4:
-        mw.reviewer._naswerCard(4)
+        mw.reviewer._answerCard(4)
 
 
 ACTIONS = {
