@@ -104,7 +104,8 @@ def mouse_shortcut(btns, wheel = 0, click=None):
     elif wheel == -1:
         shortcut_key_str += "wheel_down_"
     shortcut_key_str = shortcut_key_str[:-1] #removes '_' at the end
-    #tooltip(shortcut_key_str)
+    if config["z_debug"]:
+        tooltip(shortcut_key_str)
 
     #check if shortcut exist, run designated action if it does
     if shortcut_key_str in config:

@@ -1,6 +1,10 @@
-- `tooltip`: Show tooltip when hotmouse action is triggered
+**General Config**
+
+- `tooltip`[true/false]: Show tooltip when hotmouse action is triggered
+- `z_debug`[true/false]: Show hotkey on mouse action.
 
 **Card side**
+
 - `q` : Works when viewing question
 - `a` : Works when viewing answers
 
