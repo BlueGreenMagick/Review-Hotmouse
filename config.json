@@ -8,5 +8,6 @@
     "a_wheel_down": "good",
     "a_press_middle_wheel_up": "hard",
     "a_press_middle_wheel_down": "easy",
-    "threshold_wheel_ms": 350
+    "threshold_wheel_ms": 350,
+    "tooltip": false
 }

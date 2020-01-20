@@ -110,7 +110,8 @@ def mouse_shortcut(btns, wheel = 0, click=None):
     if shortcut_key_str in config:
         action_str = config[shortcut_key_str]
         ACTIONS[action_str]()
-        #tooltip(action_str)
+        if(config["tooltip"]):
+            tooltip(action_str)
 
 def on_mouse_press(event): #click
     btns = get_pressed_buttons(event.buttons())
@@ -161,6 +162,8 @@ def event_filter(self, obj, event, _old=lambda s,o,e: None):
             on_mouse_press(event)
         elif event.type() == QEvent.MouseButtonRelease:
             on_mouse_release(event)
+        elif event.type() == QEvent.Wheel:
+            on_mouse_scroll(event)
     return _old(self, obj, event)
 
 def add_event_filter_children(obj):
@@ -169,6 +172,7 @@ def add_event_filter_children(obj):
         w.installEventFilter(mw.web)
         add_event_filter_children(w)
 
+#Doesn't seem to work anymore in newer anki
 def on_wheel(self, event, _old=lambda s, e: None):
     global ON, ignore_release
     if mw.state == "review" and ON == True:

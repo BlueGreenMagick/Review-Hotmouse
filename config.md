@@ -1,6 +1,8 @@
+- `tooltip`: Show tooltip when hotmouse action is triggered
+
 **Card side**
-- `q` : works when viewing question
-- `a` : works when viewing answers
+- `q` : Works when viewing question
+- `a` : Works when viewing answers
 
 **mouse buttons (press/click)**
 
@@ -47,6 +49,7 @@ When 2+ inputs are combined to make a shortcut, the order of input type must be 
 - `record_voice`
 - `replay_voice`
 - `context_menu` : 'copy' context menu.
+- `<none>`: Does nothing
 
 **syntax**:
 
