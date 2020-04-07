@@ -193,7 +193,7 @@ def addTurnonAddon(self, m):
         a = m.addAction(_("Enable Hotmouse"))
         a.triggered.connect(turn_on)
 
-def onProfileLoaded():
+def installFilters():
     try:
         AnkiWebView.eventFilter = wrap(AnkiWebView.eventFilter, event_filter, "around")
     except TypeError:
@@ -210,5 +210,5 @@ def onProfileLoaded():
     add_event_filter_children(mw.web)
 
 last_scroll_time = datetime.datetime.now()
-addHook("profileLoaded", onProfileLoaded)
 addHook("AnkiWebView.contextMenuEvent", addTurnonAddon)
+installFilters()
