@@ -190,7 +190,7 @@ def new_contextMenuEvent(self, i, _old):
 
 def addTurnonAddon(self, m):
     if mw.state == "review" and ON == False:
-        a = m.addAction(_("Enable Hotmouse"))
+        a = m.addAction("Enable Hotmouse")
         a.triggered.connect(turn_on)
 
 def installFilters():
