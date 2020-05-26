@@ -81,6 +81,13 @@ BUTTONS = {
     "middle": Qt.MiddleButton,
     "xbutton1": Qt.XButton1,
     "xbutton2": Qt.XButton2,
+    "xbutton3": Qt.ExtraButton3,
+    "xbutton4": Qt.ExtraButton4,
+    "xbutton5": Qt.ExtraButton5,
+    "xbutton6": Qt.ExtraButton6,
+    "xbutton7": Qt.ExtraButton7,
+    "xbutton8": Qt.ExtraButton8,
+    "xbutton9": Qt.ExtraButton9,
 }
 
 BUTTONS_INVERSE = {v: k for k, v in BUTTONS.items()}
