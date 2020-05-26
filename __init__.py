@@ -169,8 +169,7 @@ def on_child_event(self, event, _old=lambda s, e: None):
 
 
 def event_filter(self, obj, event, _old=lambda s, o, e: None):
-    global ON
-    if mw.state == "review" and ON == True:
+    if during_review(self):
         if event.type() == QEvent.MouseButtonPress:
             on_mouse_press(event)
         elif event.type() == QEvent.MouseButtonRelease:
@@ -189,25 +188,35 @@ def add_event_filter_children(obj):
 
 # Doesn't seem to work anymore in newer anki
 def on_wheel(self, event, _old=lambda s, e: None):
-    global ON, ignore_release
-    if mw.state == "review" and ON == True:
+    global ignore_release
+    if during_review(self):
         ignore_release = True
         on_mouse_scroll(event)
     return _old(self, event)
 
 
 def new_contextMenuEvent(self, i, _old):
-    global ON
-    if mw.state == "review" and ON == True and i != "hotmouse_review":
+    if during_review(self) and i != "hotmouse_review":
         return
     else:
         _old(self, i)
 
 
 def addTurnonAddon(self, m):
-    if mw.state == "review" and ON == False:
+    if during_review(self, on=False):
         a = m.addAction("Enable Hotmouse")
         a.triggered.connect(turn_on)
+
+
+def during_review(wv, on=True):
+    "on=False is passed when checking if in review but review hotmouse is turned off"
+    if mw.state != "review":
+        return False
+    if ON != on:
+        return False
+    if wv not in [mw.web, mw.bottomWeb]:
+        return False
+    return True
 
 
 def installFilters():
