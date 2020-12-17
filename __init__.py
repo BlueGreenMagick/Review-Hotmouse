@@ -192,16 +192,6 @@ def add_event_filter_children(obj):
         w.installEventFilter(mw.web)
         add_event_filter_children(w)
 
-
-# Doesn't seem to work anymore in newer anki
-def on_wheel(self, event, _old=lambda s, e: None):
-    global ignore_release
-    if during_review(self):
-        ignore_release = True
-        on_mouse_scroll(event)
-    return _old(self, event)
-
-
 def new_contextMenuEvent(self, i, _old):
     if during_review(self) and i != "hotmouse_review":
         return
@@ -231,10 +221,6 @@ def installFilters():
         AnkiWebView.eventFilter = wrap(AnkiWebView.eventFilter, event_filter, "around")
     except TypeError:
         AnkiWebView.eventFilter = event_filter
-    try:
-        AnkiWebView.wheelEvent = wrap(AnkiWebView.wheelEvent, on_wheel, "around")
-    except TypeError:
-        AnkiWebView.wheelEvent = on_wheel
     try:
         AnkiWebView.childEvent = wrap(AnkiWebView.childEvent, on_child_event, "around")
     except TypeError:
