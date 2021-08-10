@@ -10,5 +10,9 @@
     "a_press_middle_wheel_down": "easy",
     "threshold_wheel_ms": 350,
     "tooltip": false,
-    "z_debug": false
+    "z_debug": false,
+    "version": {
+        "major": -1,
+        "minor": -1
+    }
 }
