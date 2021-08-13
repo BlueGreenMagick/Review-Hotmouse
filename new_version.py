@@ -10,10 +10,10 @@ addon_dir = Path(__file__).resolve().parents[1] / "src" / "addon"
 
 # Write version in manifest.json
 manifest_path = addon_dir / "manifest.json"
-with manifest_path.open('r') as f:
+with manifest_path.open("r") as f:
     manifest = simplejson.load(f)
 
-with manifest_path.open('w') as f:
+with manifest_path.open("w") as f:
     manifest["human_version"] = version_string
     simplejson.dump(manifest, f, indent=2)
 

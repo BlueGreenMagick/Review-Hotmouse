@@ -93,7 +93,7 @@ class WheelDir(Enum):
     UP = 1
 
 
-class HotmouseManager():
+class HotmouseManager:
     def __init__(self) -> None:
         self.enabled = True
         self.ready = True
@@ -109,7 +109,12 @@ class HotmouseManager():
                 buttons.append(b)
         return buttons
 
-    def mouse_shortcut(self, btns: List[Button], wheel: Optional[WheelDir] = None, click: Optional[Button] = None) -> None:
+    def mouse_shortcut(
+        self,
+        btns: List[Button],
+        wheel: Optional[WheelDir] = None,
+        click: Optional[Button] = None,
+    ) -> None:
         """wheel and click should not be passed an argument together!"""
         # build shortcut string
         if mw.reviewer.state == "question":
@@ -186,7 +191,11 @@ def on_child_event(target: QObject, event: QChildEvent) -> None:
         event.child().installEventFilter(target)
 
 
-def on_context_menu(target: QObject, ev: QContextMenuEvent, _old: Callable[[Any, Any], Any] = lambda t, e: None) -> None:
+def on_context_menu(
+    target: QObject,
+    ev: QContextMenuEvent,
+    _old: Callable[[Any, Any], Any] = lambda t, e: None,
+) -> None:
     if manager.enabled:
         return
 
@@ -195,8 +204,7 @@ def on_context_menu(target: QObject, ev: QContextMenuEvent, _old: Callable[[Any,
 def installFilters() -> None:
     target = AnkiWebView
     if "eventFilter" in vars(target):
-        target.eventFilter = wrap(
-            target.eventFilter, event_filter, "before")
+        target.eventFilter = wrap(target.eventFilter, event_filter, "before")
     else:
         target.eventFilter = event_filter
     if "childEvent" in vars(target):
@@ -205,7 +213,8 @@ def installFilters() -> None:
         target.childEvent = on_child_event
     if "contextMenuEvent" in vars(target):
         target.contextMenuEvent = wrap(
-            target.contextMenuEvent, on_context_menu, "around")
+            target.contextMenuEvent, on_context_menu, "around"
+        )
 
 
 def add_event_filter_children(parent: QObject, master: AnkiWebView) -> None:
