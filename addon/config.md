@@ -23,13 +23,29 @@
 
 **input types**
 
-- `press` : Buttons being pressed when triggered. 'press' only hotmouse is triggered upon the first release of a button.
-- `click` : Triggered when the button is pressed.
+- `press` : Buttons being pressed when triggered.
+- `click` : Triggered when this button is pressed.
 - `wheel` : Scrolling inputs.
 
-**multi inputs**
+**Shortcut Syntax**
 
-When 2+ inputs are combined to make a shortcut, the order of input type must be press -> click -> wheel, and for multiple 'press', the order of mouse buttons. There can only be one 'click' and one 'wheel' maximum.
+click\_<button>
+wheel\_<direction>
+
+When 2+ inputs are combined to make a shortcut, start with multiple 'press', and put either a 'click' or a 'wheel' at the end.
+
+press\_<button>\_click\_<button>
+press\_<button>\_press\_<button>\_wheel\_<direction>
+
+**Shortcut Syntax**:
+
+- \[q/a\]\_\[type\]\_\[button/wheel\]
+- \[q/a\]\_\[type\]\_\[button\]\_\[type\]\_\[button/wheel\]
+- \[q/a\]_\[type\]\_\[button\]\_\[type\]\_\[button\]\_\[type\]\_\[button/wheel\]
+
+view examples at https://github.com/BlueGreenMagick/Hotmouse-Review
+
+
 
 **action**
 
@@ -52,13 +68,4 @@ When 2+ inputs are combined to make a shortcut, the order of input type must be 
 - `audio` : replay audio
 - `record_voice`
 - `replay_voice`
-- `context_menu` : 'copy' context menu.
 - `<none>`: Does nothing
-
-**syntax**:
-
-- \[q/a\]\_\[type\]\_\[button/wheel\]
-- \[q/a\]\_\[type\]\_\[button\]\_\[type\]\_\[button/wheel\]
-- \[q/a\]_\[type\]\_\[button\]\_\[type\]\_\[button\]\_\[type\]\_\[button/wheel\]
-
-view examples at https://github.com/BlueGreenMagick/Hotmouse-Review
