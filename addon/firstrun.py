@@ -1,4 +1,3 @@
-
 from aqt import mw
 from pathlib import Path
 
@@ -32,6 +31,7 @@ class Version:
         return self == other or self < other
 
 
+# version of the add-on prior to running this script
 version = Version()
 
 # Save current version
@@ -39,3 +39,5 @@ version_file = Path(__file__).parent / "VERSION"
 version_string = version_file.read_text()
 config["version"]["major"] = int(version_string.split(".")[0])
 config["version"]["minor"] = int(version_string.split(".")[1])
+
+####################################################################
