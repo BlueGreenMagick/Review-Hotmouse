@@ -102,23 +102,36 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
         hlay = hotkey_layout(hotkey)
         alay = action_layout(action)
         if hlay and alay:
-            layout = tab.hlayout()
+            container = QWidget()
+            layout = ConfigLayout(conf_window, QBoxLayout.LeftToRight)
+            layout.setContentsMargins(0, 4, 2, 4)  # decrease margin
+            container.setLayout(layout)
+            tab.addWidget(container)
             layout.addLayout(hlay)
             layout.addLayout(alay)
+            label = QLabel("&nbsp;<a href='/' style='text-decoration:none;'>❌</a>")
+            label.setTextFormat(Qt.RichText)
+            layout.addWidget(label)
+
+            def remove(l: str) -> None:
+                tab.removeWidget(container)
+                container.deleteLater()
+
+            label.linkActivated.connect(remove)
 
     q_tab = conf_window.add_tab("Question Side Hotkeys")
     a_tab = conf_window.add_tab("Answer Side Hotkeys")
     hotkeys = conf.get("hotkeys")
     for hotkey in hotkeys:
         if hotkey[0] == "q":
-            target_tab = q_tab
+            build_row(q_tab, hotkey, hotkeys[hotkey])
         elif hotkey[0] == "a":
-            target_tab = a_tab
+            build_row(a_tab, hotkey, hotkeys[hotkey])
         else:
             continue
-        build_row(target_tab, hotkey, hotkeys[hotkey])
-    q_tab.stretch()
-    a_tab.stretch()
+    for tab in (q_tab, a_tab):
+        tab.setSpacing(0)
+        tab.stretch()
 
 
 conf = ConfigManager()
