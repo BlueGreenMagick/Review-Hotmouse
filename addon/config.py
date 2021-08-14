@@ -23,7 +23,7 @@ def create_dropdown(
     layout: ConfigLayout,
     current: str,
     options: List[str],
-    on_change: Optional[Callable[[int, int], None]] = None,
+    on_change: Optional[Callable[[ConfigLayout, int, int], None]] = None,
 ) -> QComboBox:
     """
     on_change takes 2 arguments:
@@ -45,15 +45,13 @@ def create_dropdown(
     return dropdown
 
 
-def hotkey_tab(conf_window: ConfigWindow) -> None:
-    tab = conf_window.add_tab("Hotkeys")
-
+def hotkey_tabs(conf_window: ConfigWindow) -> None:
     button_opts = [b.name for b in Button]
     action_opts = list(ACTIONS.keys())
     mode_opts = ["press", "click", "wheel"]
     wheel_opts = ["up", "down"]
 
-    def on_mode_change(layout, optidx: int, ddidx: int) -> None:
+    def on_mode_change(layout: ConfigLayout, optidx: int, ddidx: int) -> None:
         """Handler for when mode dropdown changes"""
         mode = mode_opts[optidx]
         if mode == "press":
@@ -71,7 +69,7 @@ def hotkey_tab(conf_window: ConfigWindow) -> None:
                 create_dropdown(layout, wheel_opts[0], wheel_opts)
 
     def hotkey_layout(hotkey: str) -> Optional[ConfigLayout]:
-        layout = ConfigLayout(tab, QBoxLayout.LeftToRight)
+        layout = ConfigLayout(conf_window, QBoxLayout.LeftToRight)
 
         hotkeylist = hotkey[2:].split("_")
         while len(hotkeylist):
@@ -94,13 +92,13 @@ def hotkey_tab(conf_window: ConfigWindow) -> None:
         return layout
 
     def action_layout(action: str) -> Optional[ConfigLayout]:
-        layout = ConfigLayout(tab, QBoxLayout.LeftToRight)
+        layout = ConfigLayout(conf_window, QBoxLayout.LeftToRight)
         layout.stretch()
         layout.text("&nbsp;<b>→</b>&nbsp;", html=True)
         create_dropdown(layout, action, action_opts)
         return layout
 
-    def build_row(hotkey: str, action: str) -> None:
+    def build_row(tab: ConfigLayout, hotkey: str, action: str) -> None:
         hlay = hotkey_layout(hotkey)
         alay = action_layout(action)
         if hlay and alay:
@@ -108,12 +106,22 @@ def hotkey_tab(conf_window: ConfigWindow) -> None:
             layout.addLayout(hlay)
             layout.addLayout(alay)
 
+    q_tab = conf_window.add_tab("Question Side Hotkeys")
+    a_tab = conf_window.add_tab("Answer Side Hotkeys")
     hotkeys = conf.get("hotkeys")
     for hotkey in hotkeys:
-        build_row(hotkey, hotkeys[hotkey])
+        if hotkey[0] == "q":
+            target_tab = q_tab
+        elif hotkey[0] == "a":
+            target_tab = a_tab
+        else:
+            continue
+        build_row(target_tab, hotkey, hotkeys[hotkey])
+    q_tab.stretch()
+    a_tab.stretch()
 
 
 conf = ConfigManager()
 conf.use_custom_window()
 conf.add_config_tab(general_tab)
-conf.add_config_tab(hotkey_tab)
+conf.add_config_tab(hotkey_tabs)
