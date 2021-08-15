@@ -120,35 +120,44 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
 
             label.linkActivated.connect(remove)
 
-    q_tab = conf_window.add_tab("Question Side Hotkeys")
-    a_tab = conf_window.add_tab("Answer Side Hotkeys")
-    q_rows_layout = q_tab.vlayout()
-    a_rows_layout = a_tab.vlayout()
-    hotkeys = conf.get("hotkeys")
-    for hotkey in hotkeys:
-        if hotkey[0] == "q":
-            build_row(q_rows_layout, hotkey[2:], hotkeys[hotkey])
-        elif hotkey[0] == "a":
-            build_row(a_rows_layout, hotkey[2:], hotkeys[hotkey])
-        else:
-            continue
-    for tab in (q_tab, a_tab):
-        btn_layout = tab.hlayout()
-        add_btn = QPushButton("+  Add New ")
-        add_btn.clicked.connect(
-            lambda _, rows=tab.itemAt(0): build_row(rows, "click_right", "<none>")
-        )
-        add_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        add_btn.setCursor(QCursor(Qt.PointingHandCursor))
-        btn_layout.addWidget(add_btn)
-        btn_layout.stretch()
-        btn_layout.setContentsMargins(0, 20, 0, 5)
-        tab.setSpacing(0)
-        tab.addLayout(btn_layout)
-        tab.stretch()
+    def add_tab() -> None:
+        if conf_window.main_tab.count() > 1:
+            conf_window.main_tab.widget(2).deleteLater()
+            conf_window.main_tab.widget(1).deleteLater()
+            conf_window.main_tab.removeTab(2)
+            conf_window.main_tab.removeTab(1)
+
+        q_tab = conf_window.add_tab("Question Side Hotkeys")
+        a_tab = conf_window.add_tab("Answer Side Hotkeys")
+        q_rows_layout = q_tab.vlayout()
+        a_rows_layout = a_tab.vlayout()
+        hotkeys = conf.get("hotkeys")
+        for hotkey in hotkeys:
+            if hotkey[0] == "q":
+                build_row(q_rows_layout, hotkey[2:], hotkeys[hotkey])
+            elif hotkey[0] == "a":
+                build_row(a_rows_layout, hotkey[2:], hotkeys[hotkey])
+            else:
+                continue
+        for tab in (q_tab, a_tab):
+            btn_layout = tab.hlayout()
+            add_btn = QPushButton("+  Add New ")
+            add_btn.clicked.connect(
+                lambda _, rows=tab.itemAt(0): build_row(rows, "click_right", "<none>")
+            )
+            add_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+            add_btn.setCursor(QCursor(Qt.PointingHandCursor))
+            btn_layout.addWidget(add_btn)
+            btn_layout.stretch()
+            btn_layout.setContentsMargins(0, 20, 0, 5)
+            tab.setSpacing(0)
+            tab.addLayout(btn_layout)
+            tab.stretch()
+
+    conf_window.widget_updates.append(add_tab)
 
 
 conf = ConfigManager()
 conf.use_custom_window()
 conf.add_config_tab(general_tab)
-conf.add_config_tab(hotkey_tabs)
+conf.on_window_open(hotkey_tabs)
