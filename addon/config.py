@@ -69,9 +69,10 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
                 create_dropdown(layout, wheel_opts[0], wheel_opts)
 
     def hotkey_layout(hotkey: str) -> Optional[ConfigLayout]:
+        """ hotkey eg: `press_left_click_right`. Without `q_` or `a_`. """
         layout = ConfigLayout(conf_window, QBoxLayout.LeftToRight)
 
-        hotkeylist = hotkey[2:].split("_")
+        hotkeylist = hotkey.split("_")
         while len(hotkeylist):
             if len(hotkeylist) == 1:
                 return None
@@ -98,7 +99,7 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
         create_dropdown(layout, action, action_opts)
         return layout
 
-    def build_row(tab: ConfigLayout, hotkey: str, action: str) -> None:
+    def build_row(rows_layout: ConfigLayout, hotkey: str, action: str) -> None:
         hlay = hotkey_layout(hotkey)
         alay = action_layout(action)
         if hlay and alay:
@@ -106,7 +107,7 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
             layout = ConfigLayout(conf_window, QBoxLayout.LeftToRight)
             layout.setContentsMargins(0, 4, 2, 4)  # decrease margin
             container.setLayout(layout)
-            tab.addWidget(container)
+            rows_layout.addWidget(container)
             layout.addLayout(hlay)
             layout.addLayout(alay)
             label = QLabel("&nbsp;<a href='/' style='text-decoration:none;'>❌</a>")
@@ -114,23 +115,36 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
             layout.addWidget(label)
 
             def remove(l: str) -> None:
-                tab.removeWidget(container)
+                rows_layout.removeWidget(container)
                 container.deleteLater()
 
             label.linkActivated.connect(remove)
 
     q_tab = conf_window.add_tab("Question Side Hotkeys")
     a_tab = conf_window.add_tab("Answer Side Hotkeys")
+    q_rows_layout = q_tab.vlayout()
+    a_rows_layout = a_tab.vlayout()
     hotkeys = conf.get("hotkeys")
     for hotkey in hotkeys:
         if hotkey[0] == "q":
-            build_row(q_tab, hotkey, hotkeys[hotkey])
+            build_row(q_rows_layout, hotkey[2:], hotkeys[hotkey])
         elif hotkey[0] == "a":
-            build_row(a_tab, hotkey, hotkeys[hotkey])
+            build_row(a_rows_layout, hotkey[2:], hotkeys[hotkey])
         else:
             continue
     for tab in (q_tab, a_tab):
+        btn_layout = tab.hlayout()
+        add_btn = QPushButton("+  Add New ")
+        add_btn.clicked.connect(
+            lambda _, rows=tab.itemAt(0): build_row(rows, "click_right", "<none>")
+        )
+        add_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        add_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        btn_layout.addWidget(add_btn)
+        btn_layout.stretch()
+        btn_layout.setContentsMargins(0, 20, 0, 5)
         tab.setSpacing(0)
+        tab.addLayout(btn_layout)
         tab.stretch()
 
 
