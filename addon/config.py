@@ -1,4 +1,4 @@
-from typing import Callable, Optional, List, Union, Literal
+from typing import Callable, NamedTuple, Optional, List, Tuple, Union, Literal
 
 from aqt.qt import *
 
@@ -19,30 +19,10 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.stretch()
 
 
-def create_dropdown(
-    layout: ConfigLayout,
-    current: str,
-    options: List[str],
-    on_change: Optional[Callable[[ConfigLayout, int, int], None]] = None,
-) -> QComboBox:
-    """
-    on_change takes 2 arguments:
-        - index of currently selected dropdown option,
-        - index of dropdown in layout.dropdowns
-    """
-    dropdown = QComboBox()
-    dropdown.insertItems(0, options)
-    dropdown.setCurrentIndex(options.index(current))
-    layout.addWidget(dropdown)
-    if not hasattr(layout, "dropdowns"):
-        setattr(layout, "dropdowns", [])
-    layout.dropdowns.append(dropdown)
-    if on_change:
-        ddidx = len(layout.dropdowns) - 1
-        dropdown.currentIndexChanged.connect(
-            lambda optidx, l=layout, d=ddidx: on_change(l, optidx, d)
-        )
-    return dropdown
+class DDConfigLayout(ConfigLayout):
+    def __init__(self, conf_window: ConfigWindow):
+        super().__init__(conf_window, QBoxLayout.LeftToRight)
+        self.dropdowns: List[QComboBox] = []
 
 
 class HotkeyTabManager:
@@ -57,6 +37,8 @@ class HotkeyTabManager:
         self.tab = tab
         self.config_window = tab.config_window
         self.side = side
+        # [ ( [mode, button, ...], [action]), ... ]
+        self.layouts: List[Tuple[DDConfigLayout, DDConfigLayout]] = []
         self.setup_tab()
 
     def setup_tab(self) -> None:
@@ -76,8 +58,8 @@ class HotkeyTabManager:
         tab.addLayout(btn_layout)
         tab.stretch()
 
-    def create_layout(self) -> ConfigLayout:
-        return ConfigLayout(self.config_window, QBoxLayout.LeftToRight)
+    def create_layout(self) -> DDConfigLayout:
+        return DDConfigLayout(self.config_window)
 
     def clear_rows(self) -> None:
         """Clear all rows in tab. Run before setup_rows."""
@@ -92,27 +74,52 @@ class HotkeyTabManager:
             if hotkey[0] == self.side:
                 self.add_row(hotkey, hotkeys[hotkey])
 
-    def on_mode_change(self, layout: ConfigLayout, optidx: int, ddidx: int) -> None:
+    def create_dropdown(
+        self,
+        layout: DDConfigLayout,
+        current: str,
+        options: List[str],
+        on_change: Optional[Callable] = None,
+    ) -> QComboBox:
+        """
+        on_change takes 2 arguments:
+            - index of currently selected dropdown option,
+            - index of dropdown in layout.dropdowns
+        """
+        dropdown = QComboBox()
+        dropdown.insertItems(0, options)
+        dropdown.setCurrentIndex(options.index(current))
+        layout.addWidget(dropdown)
+        layout.dropdowns.append(dropdown)
+        if on_change:
+            ddidx = len(layout.dropdowns) - 1
+            dropdown.currentIndexChanged.connect(
+                lambda optidx, l=layout, d=ddidx: self.on_mode_change(l, optidx, d)
+            )
+        return dropdown
+
+    def on_mode_change(self, layout: DDConfigLayout, optidx: int, ddidx: int) -> None:
         """Handler for when mode dropdown changes"""
         button_opts = self.button_opts
         mode_opts = self.mode_opts
         wheel_opts = self.wheel_opts
         mode = mode_opts[optidx]
+        dropdowns = layout.dropdowns
         if mode == "press":
-            layout.removeWidget(layout.dropdowns.pop(ddidx + 1))
-            create_dropdown(layout, button_opts[0], button_opts)
-            create_dropdown(layout, "click", mode_opts, self.on_mode_change)
-            create_dropdown(layout, button_opts[0], button_opts)
+            layout.removeWidget(dropdowns.pop(ddidx + 1))
+            self.create_dropdown(layout, button_opts[0], button_opts)
+            self.create_dropdown(layout, "click", mode_opts, self.on_mode_change)
+            self.create_dropdown(layout, button_opts[0], button_opts)
         else:
-            while len(layout.dropdowns) > ddidx + 1:
+            while len(dropdowns) > ddidx + 1:
                 # make this the last dropdown
-                layout.removeWidget(layout.dropdowns.pop())
+                layout.removeWidget(dropdowns.pop())
             if mode == "click":
-                create_dropdown(layout, button_opts[0], button_opts)
+                self.create_dropdown(layout, button_opts[0], button_opts)
             else:  # mode == "wheel"
-                create_dropdown(layout, wheel_opts[0], wheel_opts)
+                self.create_dropdown(layout, wheel_opts[0], wheel_opts)
 
-    def hotkey_layout(self, hotkey: str) -> Optional[ConfigLayout]:
+    def hotkey_layout(self, hotkey: str) -> Optional[DDConfigLayout]:
         """ hotkey eg: `q_press_left_click_right`. Returns None if hotkey is invalid. """
         button_opts = self.button_opts
         mode_opts = self.mode_opts
@@ -132,21 +139,21 @@ class HotkeyTabManager:
             if mode in ("press", "click") and btn not in button_opts:
                 return None
 
-            create_dropdown(layout, mode, mode_opts, self.on_mode_change)
+            self.create_dropdown(layout, mode, mode_opts, self.on_mode_change)
             if mode == "wheel":
-                create_dropdown(layout, btn, wheel_opts)
+                self.create_dropdown(layout, btn, wheel_opts)
             else:
-                create_dropdown(layout, btn, button_opts)
+                self.create_dropdown(layout, btn, button_opts)
         return layout
 
-    def action_layout(self, action: str) -> Optional[ConfigLayout]:
+    def action_layout(self, action: str) -> Optional[DDConfigLayout]:
         """Returns None if action string is invalid."""
         if action not in self.action_opts:
             return None
         layout = self.create_layout()
         layout.stretch()
         layout.text("&nbsp;<b>→</b>&nbsp;", html=True)
-        create_dropdown(layout, action, self.action_opts)
+        self.create_dropdown(layout, action, self.action_opts)
         return layout
 
     def add_row(self, hotkey: str, action: str) -> None:
@@ -173,6 +180,9 @@ class HotkeyTabManager:
     def on_update(self) -> None:
         self.clear_rows()
         self.setup_rows()
+
+    def on_save(self) -> None:
+        pass
 
 
 def hotkey_tabs(conf_window: ConfigWindow) -> None:
