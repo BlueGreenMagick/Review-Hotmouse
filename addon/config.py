@@ -1,4 +1,4 @@
-from typing import Callable, NamedTuple, Optional, List, Tuple, Union, Literal
+from typing import NamedTuple, Optional, List, Tuple, Union, Literal
 
 from aqt.qt import *
 
@@ -19,18 +19,66 @@ def general_tab(conf_window: ConfigWindow) -> None:
     tab.stretch()
 
 
+class Options(NamedTuple):
+    mode: List[str]
+    button: List[str]
+    wheel: List[str]
+    action: List[str]
+
+
+OPTS = Options(
+    ["press", "click", "wheel"],
+    [b.name for b in Button],
+    ["up", "down"],
+    list(ACTIONS.keys()),
+)
+
+
 class DDConfigLayout(ConfigLayout):
     def __init__(self, conf_window: ConfigWindow):
         super().__init__(conf_window, QBoxLayout.LeftToRight)
         self.dropdowns: List[QComboBox] = []
 
+    def create_dropdown(
+        self, current: str, options: List[str], is_mode: bool = False
+    ) -> QComboBox:
+        """
+        on_change takes 2 arguments:
+            - index of currently selected dropdown option,
+            - index of dropdown in layout.dropdowns
+        """
+        dropdown = QComboBox()
+        dropdown.insertItems(0, options)
+        dropdown.setCurrentIndex(options.index(current))
+        self.addWidget(dropdown)
+        self.dropdowns.append(dropdown)
+        if is_mode:
+            ddidx = len(self.dropdowns) - 1
+            dropdown.currentIndexChanged.connect(
+                lambda optidx, d=ddidx: self.on_mode_change(optidx, d)
+            )
+        return dropdown
+
+    def on_mode_change(self, optidx: int, ddidx: int) -> None:
+        """Handler for when mode dropdown changes"""
+        mode = OPTS.mode[optidx]
+        dropdowns = self.dropdowns
+        if mode == "press":
+            self.removeWidget(dropdowns.pop(ddidx + 1))
+            self.create_dropdown(OPTS.button[0], OPTS.button)
+            self.create_dropdown("click", OPTS.mode, is_mode=True)
+            self.create_dropdown(OPTS.button[0], OPTS.button)
+        else:
+            while len(dropdowns) > ddidx + 1:
+                # make this the last dropdown
+                self.removeWidget(dropdowns.pop())
+            if mode == "click":
+                self.create_dropdown(OPTS.button[0], OPTS.button)
+            else:  # mode == "wheel"
+                self.create_dropdown(OPTS.wheel[0], OPTS.wheel)
+
 
 class HotkeyTabManager:
-    button_opts = [b.name for b in Button]
-    action_opts = list(ACTIONS.keys())
-    mode_opts = ["press", "click", "wheel"]
-    wheel_opts = ["up", "down"]
-
     def __init__(
         self, tab: ConfigLayout, side: Union[Literal["q"], Literal["a"]]
     ) -> None:
@@ -74,56 +122,8 @@ class HotkeyTabManager:
             if hotkey[0] == self.side:
                 self.add_row(hotkey, hotkeys[hotkey])
 
-    def create_dropdown(
-        self,
-        layout: DDConfigLayout,
-        current: str,
-        options: List[str],
-        on_change: Optional[Callable] = None,
-    ) -> QComboBox:
-        """
-        on_change takes 2 arguments:
-            - index of currently selected dropdown option,
-            - index of dropdown in layout.dropdowns
-        """
-        dropdown = QComboBox()
-        dropdown.insertItems(0, options)
-        dropdown.setCurrentIndex(options.index(current))
-        layout.addWidget(dropdown)
-        layout.dropdowns.append(dropdown)
-        if on_change:
-            ddidx = len(layout.dropdowns) - 1
-            dropdown.currentIndexChanged.connect(
-                lambda optidx, l=layout, d=ddidx: self.on_mode_change(l, optidx, d)
-            )
-        return dropdown
-
-    def on_mode_change(self, layout: DDConfigLayout, optidx: int, ddidx: int) -> None:
-        """Handler for when mode dropdown changes"""
-        button_opts = self.button_opts
-        mode_opts = self.mode_opts
-        wheel_opts = self.wheel_opts
-        mode = mode_opts[optidx]
-        dropdowns = layout.dropdowns
-        if mode == "press":
-            layout.removeWidget(dropdowns.pop(ddidx + 1))
-            self.create_dropdown(layout, button_opts[0], button_opts)
-            self.create_dropdown(layout, "click", mode_opts, self.on_mode_change)
-            self.create_dropdown(layout, button_opts[0], button_opts)
-        else:
-            while len(dropdowns) > ddidx + 1:
-                # make this the last dropdown
-                layout.removeWidget(dropdowns.pop())
-            if mode == "click":
-                self.create_dropdown(layout, button_opts[0], button_opts)
-            else:  # mode == "wheel"
-                self.create_dropdown(layout, wheel_opts[0], wheel_opts)
-
     def hotkey_layout(self, hotkey: str) -> Optional[DDConfigLayout]:
         """ hotkey eg: `q_press_left_click_right`. Returns None if hotkey is invalid. """
-        button_opts = self.button_opts
-        mode_opts = self.mode_opts
-        wheel_opts = self.wheel_opts
 
         layout = self.create_layout()
         hotkeylist = hotkey[2:].split("_")
@@ -132,28 +132,28 @@ class HotkeyTabManager:
         for i in range(0, len(hotkeylist), 2):
             mode = hotkeylist[i]
             btn = hotkeylist[i + 1]
-            if mode not in mode_opts:
+            if mode not in OPTS.mode:
                 return None
-            if mode == "wheel" and btn not in wheel_opts:
+            if mode == "wheel" and btn not in OPTS.wheel:
                 return None
-            if mode in ("press", "click") and btn not in button_opts:
+            if mode in ("press", "click") and btn not in OPTS.button:
                 return None
 
-            self.create_dropdown(layout, mode, mode_opts, self.on_mode_change)
+            layout.create_dropdown(mode, OPTS.mode, is_mode=True)
             if mode == "wheel":
-                self.create_dropdown(layout, btn, wheel_opts)
+                layout.create_dropdown(btn, OPTS.wheel)
             else:
-                self.create_dropdown(layout, btn, button_opts)
+                layout.create_dropdown(btn, OPTS.button)
         return layout
 
     def action_layout(self, action: str) -> Optional[DDConfigLayout]:
         """Returns None if action string is invalid."""
-        if action not in self.action_opts:
+        if action not in OPTS.action:
             return None
         layout = self.create_layout()
         layout.stretch()
         layout.text("&nbsp;<b>→</b>&nbsp;", html=True)
-        self.create_dropdown(layout, action, self.action_opts)
+        layout.create_dropdown(action, OPTS.action)
         return layout
 
     def add_row(self, hotkey: str, action: str) -> None:
