@@ -173,6 +173,7 @@ class HotkeyTabManager:
             self.layouts.append(layout_tuple)
             label = QLabel("&nbsp;<a href='/' style='text-decoration:none;'>❌</a>")
             label.setTextFormat(Qt.RichText)
+            label.setToolTip("Delete this shortcut.")
             layout.addWidget(label)
 
             def remove(l: str, layouts: Tuple[DDConfigLayout, DDConfigLayout]) -> None:
