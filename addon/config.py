@@ -1,4 +1,4 @@
-from typing import NamedTuple, Optional, List, Tuple, Union, Literal
+from typing import NamedTuple, Optional, List, Dict, Tuple, Union, Literal
 
 from aqt.qt import *
 
@@ -85,7 +85,7 @@ class HotkeyTabManager:
         self.tab = tab
         self.config_window = tab.config_window
         self.side = side
-        # [ ( [mode, button, ...], [action]), ... ]
+        # For each row, (hotkey_layout, action_layout)
         self.layouts: List[Tuple[DDConfigLayout, DDConfigLayout]] = []
         self.setup_tab()
 
@@ -105,6 +105,8 @@ class HotkeyTabManager:
         tab.setSpacing(0)
         tab.addLayout(btn_layout)
         tab.stretch()
+        tab.space(10)
+        tab.text("If you set duplicate hotkeys, only the last one will be saved.")
 
     def create_layout(self) -> DDConfigLayout:
         return DDConfigLayout(self.config_window)
@@ -115,6 +117,7 @@ class HotkeyTabManager:
             widget = self.rows_layout.itemAt(0).widget()
             self.rows_layout.removeWidget(widget)
             widget.deleteLater()
+            self.layouts = []
 
     def setup_rows(self) -> None:
         hotkeys = conf.get("hotkeys")
@@ -124,7 +127,6 @@ class HotkeyTabManager:
 
     def hotkey_layout(self, hotkey: str) -> Optional[DDConfigLayout]:
         """ hotkey eg: `q_press_left_click_right`. Returns None if hotkey is invalid. """
-
         layout = self.create_layout()
         hotkeylist = hotkey[2:].split("_")
         if len(hotkeylist) % 2 != 0:
@@ -167,22 +169,34 @@ class HotkeyTabManager:
             self.rows_layout.addWidget(container)
             layout.addLayout(hlay)
             layout.addLayout(alay)
+            layout_tuple = (hlay, alay)
+            self.layouts.append(layout_tuple)
             label = QLabel("&nbsp;<a href='/' style='text-decoration:none;'>❌</a>")
             label.setTextFormat(Qt.RichText)
             layout.addWidget(label)
 
-            def remove(l: str) -> None:
+            def remove(l: str, layouts: Tuple[DDConfigLayout, DDConfigLayout]) -> None:
                 self.rows_layout.removeWidget(container)
                 container.deleteLater()
+                self.layouts.remove(layouts)
 
-            label.linkActivated.connect(remove)
+            label.linkActivated.connect(lambda l, t=layout_tuple: remove(l, t))
 
     def on_update(self) -> None:
         self.clear_rows()
         self.setup_rows()
 
-    def on_save(self) -> None:
-        pass
+    def get_data(self, hotkeys_data: Dict[str, str]) -> None:
+        """Adds hotkey entries to hotkeys_data dictionary.
+        Returns False if there is duplicate hotkeys."""
+        for row in self.layouts:
+            hotkey_layout = row[0]
+            action_layout = row[1]
+            hotkey_str = self.side  # type: str
+            for dd in hotkey_layout.dropdowns:
+                hotkey_str += "_" + dd.currentText()
+            action_str = action_layout.dropdowns[0].currentText()
+            hotkeys_data[hotkey_str] = action_str
 
 
 def hotkey_tabs(conf_window: ConfigWindow) -> None:
@@ -192,6 +206,14 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
     a_manager = HotkeyTabManager(a_tab, "a")
     conf_window.widget_updates.append(q_manager.on_update)
     conf_window.widget_updates.append(a_manager.on_update)
+
+    def save_hotkeys() -> None:
+        hotkeys: Dict[str, str] = {}
+        q_manager.get_data(hotkeys)
+        a_manager.get_data(hotkeys)
+        conf_window.conf.set("hotkeys", hotkeys)
+
+    conf_window.execute_on_save(save_hotkeys)
 
 
 conf = ConfigManager()
