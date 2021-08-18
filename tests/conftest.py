@@ -14,7 +14,7 @@ addon_path = project_path / "addon"
 sys.path.append(str(project_path))
 
 # Not sure why, but is needed to remove errors.
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def anki_session(request: Any) -> Iterator[AnkiSession]:
     param = getattr(request, "param", None)
     with anki_running() if not param else anki_running(**param) as session:
@@ -54,7 +54,7 @@ class MockAddonManager:
         return None
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(autouse=True)
 def mock_addonmanager(monkeypatch: Any, anki_session: Any) -> None:
     """Mock mw.addonManager"""
     addon_manager = MockAddonManager()

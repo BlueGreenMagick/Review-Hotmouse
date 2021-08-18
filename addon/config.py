@@ -196,8 +196,29 @@ class HotkeyTabManager:
             hotkey_str = self.side  # type: str
             for dd in hotkey_layout.dropdowns:
                 hotkey_str += "_" + dd.currentText()
+            hotkey_str = self.sort_hotkey_btn(hotkey_str)
             action_str = action_layout.dropdowns[0].currentText()
             hotkeys_data[hotkey_str] = action_str
+
+    @staticmethod
+    def sort_hotkey_btn(hotkey_str: str) -> str:
+        """Sort button order for 'press' in hotkey_str."""
+        hotkeylist = hotkey_str.split("_")
+        if len(hotkeylist) - 1 <= 4:
+            # Doesn't have multiple 'press'
+            return hotkey_str
+        btns = []
+        btn_names = [b.name for b in Button]
+        for i in range(1, len(hotkeylist) - 2, 2):
+            btn = hotkeylist[i + 1]
+            btns.append(btn)
+        btns = sorted(btns, key=lambda x: btn_names.index(x))
+        new_hotkey_str = "{}_".format(hotkeylist[0])
+        for btn in btns:
+            new_hotkey_str += "press_"
+            new_hotkey_str += "{}_".format(btn)
+        new_hotkey_str += "{}_{}".format(hotkeylist[-2], hotkeylist[-1])
+        return new_hotkey_str
 
 
 def hotkey_tabs(conf_window: ConfigWindow) -> None:
@@ -209,7 +230,6 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
     conf_window.widget_updates.append(a_manager.on_update)
 
     def save_hotkeys() -> None:
-        # TODO: press buttons should be in correct order!
         hotkeys: Dict[str, str] = {}
         q_manager.get_data(hotkeys)
         a_manager.get_data(hotkeys)
