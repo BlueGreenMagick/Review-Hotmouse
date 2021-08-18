@@ -16,7 +16,7 @@
 - `xbutton1`
 - `xbutton2`
 
-**wheel**
+**direction (wheel)**
 
 - `up`
 - `down`
@@ -27,28 +27,19 @@
 - `click` : Triggered when this button is pressed.
 - `wheel` : Scrolling inputs.
 
-**Shortcut Syntax**
-
-click\_<button>
-wheel\_<direction>
-
-When 2+ inputs are combined to make a shortcut, start with multiple 'press', and put either a 'click' or a 'wheel' at the end.
-
-press\_<button>\_click\_<button>
-press\_<button>\_press\_<button>\_wheel\_<direction>
-
 **Shortcut Syntax**:
 
-- \[q/a\]\_\[type\]\_\[button/wheel\]
-- \[q/a\]\_\[type\]\_\[button\]\_\[type\]\_\[button/wheel\]
-- \[q/a\]_\[type\]\_\[button\]\_\[type\]\_\[button\]\_\[type\]\_\[button/wheel\]
+- \[q/a\]\_\[click/wheel\]\_\[button/direction\]
+- \[q/a\]\_\[press\]\_\[button\]\_\[click/wheel\]\_\[button/direction\]
+- \[q/a\]_\[press\]\_\[button\]\_\[press\]\_\[button\]\_\[click/wheel\]\_\[button/direction\]
+- etc.
 
-view examples at https://github.com/BlueGreenMagick/Hotmouse-Review
-
+When shortcut has multiple `press\_button`s, the buttons must be in the same order as listed under *mouse_buttons*.
 
 
 **action**
 
+- `<none>`: Does nothing
 - `undo` 
 - `off`
 - `again`
@@ -68,4 +59,3 @@ view examples at https://github.com/BlueGreenMagick/Hotmouse-Review
 - `audio` : replay audio
 - `record_voice`
 - `replay_voice`
-- `<none>`: Does nothing
