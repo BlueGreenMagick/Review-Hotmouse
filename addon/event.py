@@ -70,6 +70,7 @@ ACTIONS = {
     "record_voice": mw.reviewer.onRecordVoice,
     "replay_voice": mw.reviewer.onReplayRecorded,
 }
+ACTION_OPTS = list(ACTIONS.keys())
 
 
 class Button(Enum):

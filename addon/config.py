@@ -3,7 +3,7 @@ from typing import NamedTuple, Optional, List, Dict, Tuple, Union, Literal
 from aqt.qt import *
 
 from .ankiaddonconfig import *
-from .event import ACTIONS, Button
+from .event import ACTION_OPTS, Button
 
 
 def general_tab(conf_window: ConfigWindow) -> None:
@@ -27,10 +27,10 @@ class Options(NamedTuple):
 
 
 OPTS = Options(
-    ["press", "click", "wheel"],
-    [b.name for b in Button],
-    ["up", "down"],
-    list(ACTIONS.keys()),
+    mode=["press", "click", "wheel"],
+    button=[b.name for b in Button],
+    wheel=["up", "down"],
+    action=ACTION_OPTS,
 )
 
 
@@ -209,6 +209,7 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
     conf_window.widget_updates.append(a_manager.on_update)
 
     def save_hotkeys() -> None:
+        # TODO: press buttons should be in correct order!
         hotkeys: Dict[str, str] = {}
         q_manager.get_data(hotkeys)
         a_manager.get_data(hotkeys)
