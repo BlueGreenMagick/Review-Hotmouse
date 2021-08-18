@@ -49,7 +49,6 @@ def answer_easy() -> None:
 
 ACTIONS = {
     "<none>": lambda: None,
-    "": lambda: None,
     "off": turn_off,
     "undo": mw.onUndo,
     "show_ans": mw.reviewer._getTypedAnswer,
