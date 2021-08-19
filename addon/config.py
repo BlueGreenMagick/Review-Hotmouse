@@ -24,6 +24,7 @@ class Options(NamedTuple):
     button: List[str]
     wheel: List[str]
     action: List[str]
+    question_action: List[str]
 
 
 OPTS = Options(
@@ -31,6 +32,9 @@ OPTS = Options(
     button=[b.name for b in Button],
     wheel=["up", "down"],
     action=ACTION_OPTS,
+    question_action=[
+        a for a in ACTION_OPTS if a not in ("again", "hard", "good", "easy")
+    ],
 )
 
 
@@ -42,11 +46,6 @@ class DDConfigLayout(ConfigLayout):
     def create_dropdown(
         self, current: str, options: List[str], is_mode: bool = False
     ) -> QComboBox:
-        """
-        on_change takes 2 arguments:
-            - index of currently selected dropdown option,
-            - index of dropdown in layout.dropdowns
-        """
         dropdown = QComboBox()
         dropdown.insertItems(0, options)
         dropdown.setCurrentIndex(options.index(current))
@@ -155,7 +154,11 @@ class HotkeyTabManager:
         layout = self.create_layout()
         layout.stretch()
         layout.text("&nbsp;<b>→</b>&nbsp;", html=True)
-        layout.create_dropdown(action, OPTS.action)
+        if self.side == "q":
+            act_opts = OPTS.question_action
+        else:
+            act_opts = OPTS.action
+        layout.create_dropdown(action, act_opts)
         return layout
 
     def add_row(self, hotkey: str, action: str) -> None:
@@ -188,8 +191,7 @@ class HotkeyTabManager:
         self.setup_rows()
 
     def get_data(self, hotkeys_data: Dict[str, str]) -> None:
-        """Adds hotkey entries to hotkeys_data dictionary.
-        Returns False if there is duplicate hotkeys."""
+        """Adds hotkey entries to hotkeys_data dictionary."""
         for row in self.layouts:
             hotkey_layout = row[0]
             action_layout = row[1]
