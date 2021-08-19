@@ -33,6 +33,20 @@ def test_v1_compat(anki_session: Any) -> None:
         "z_debug": False,
     }
 
+    # Test that shortcuts don't get deleted
+    v1_compat()
+    assert config == {
+        "shortcuts": {
+            "q_press_left_press_right_click_middle": "off",
+            "q_wheel_down": "<none>",
+            "q_click_right": "good",
+            "a_click_right": "undo",
+        },
+        "threshold_wheel_ms": 200,
+        "tooltip": False,
+        "z_debug": False,
+    }
+
 
 def test_modify_empty_action_shortcuts() -> None:
     from addon.compat.v1 import modify_empty_action_shortcuts

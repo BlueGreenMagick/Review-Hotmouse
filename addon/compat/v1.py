@@ -27,9 +27,9 @@ def v1_compat() -> None:
 
 
 def get_and_remove_v1_shortcuts_from_config() -> Dict[str, str]:
-    """Removes shortcuts config entries and returns them as dict."""
-    shortcuts = {}
+    """Remove and returns shortcut config entries. Including config["shortcuts"]"""
     config = mw.addonManager.getConfig(__name__)
+    shortcuts = {}
     config_keys = [
         "threshold_wheel_ms",
         "threshold_angle",
@@ -45,6 +45,10 @@ def get_and_remove_v1_shortcuts_from_config() -> Dict[str, str]:
         shortcuts[key] = config[key]
     for key in shortcuts:
         config.pop(key)
+    if "shortcuts" in config:
+        existing_shortcuts = config["shortcuts"]
+        for hotkey in existing_shortcuts:
+            shortcuts[hotkey] = existing_shortcuts[hotkey]
     mw.addonManager.writeConfig(__name__, config)
     return shortcuts
 
