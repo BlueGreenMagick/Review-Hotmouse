@@ -125,7 +125,7 @@ class HotkeyTabManager:
                 self.add_row(hotkey, hotkeys[hotkey])
 
     def hotkey_layout(self, hotkey: str) -> Optional[DDConfigLayout]:
-        """ hotkey eg: `q_press_left_click_right`. Returns None if hotkey is invalid. """
+        """hotkey eg: `q_press_left_click_right`. Returns None if hotkey is invalid."""
         layout = self.create_layout()
         hotkeylist = hotkey[2:].split("_")
         if len(hotkeylist) % 2 != 0:

@@ -109,7 +109,7 @@ class HotmouseManager:
 
     @staticmethod
     def get_pressed_buttons(event: Union[QMouseEvent, QWheelEvent]) -> List[Button]:
-        """ Returns list of pressed button names, excluding the button that caused the trigger"""
+        """Returns list of pressed button names, excluding the button that caused the trigger"""
         qbuttons = event.buttons()
         buttons = []
         for b in Button:
