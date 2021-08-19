@@ -1,6 +1,6 @@
 **General Config**
 
-- `tooltip`[true/false]: Show tooltip when hotmouse action is triggered
+- `tooltip`[true/false]: Show action when shortcut is triggered
 - `z_debug`[true/false]: Show hotkey on mouse action.
 
 **Card side**

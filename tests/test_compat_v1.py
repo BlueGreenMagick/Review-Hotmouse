@@ -22,7 +22,7 @@ def test_v1_compat(anki_session: Any) -> None:
     v1_compat()
     config = mw.addonManager.getConfig(__name__)
     assert config == {
-        "hotkeys": {
+        "shortcuts": {
             "q_press_left_press_right_click_middle": "off",
             "q_wheel_down": "<none>",
             "q_click_right": "good",

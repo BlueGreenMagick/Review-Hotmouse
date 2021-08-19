@@ -120,7 +120,7 @@ class HotkeyTabManager:
             self.layouts = []
 
     def setup_rows(self) -> None:
-        hotkeys = conf.get("hotkeys")
+        hotkeys = conf.get("shortcuts")
         for hotkey in hotkeys:
             if hotkey[0] == self.side:
                 self.add_row(hotkey, hotkeys[hotkey])
@@ -233,7 +233,7 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
         hotkeys: Dict[str, str] = {}
         q_manager.get_data(hotkeys)
         a_manager.get_data(hotkeys)
-        conf_window.conf.set("hotkeys", hotkeys)
+        conf_window.conf.set("shortcuts", hotkeys)
 
     conf_window.execute_on_save(save_hotkeys)
 

@@ -20,7 +20,7 @@ def v1_compat() -> None:
     modified = modify_hotkeys_ending_with_press(shortcuts)
     removed = remove_invalid_shortcuts(shortcuts)
     config = mw.addonManager.getConfig(__name__)
-    config["hotkeys"] = shortcuts
+    config["shortcuts"] = shortcuts
     mw.addonManager.writeConfig(__name__, config)
     if modified or removed:
         inform_v1_shortcuts_modified(modified, removed)
@@ -36,7 +36,7 @@ def get_and_remove_v1_shortcuts_from_config() -> Dict[str, str]:
         "tooltip",
         "z_debug",
         "version",
-        "hotkeys",
+        "shortcuts",
     ]
 
     for key in config:

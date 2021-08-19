@@ -141,7 +141,7 @@ class HotmouseManager:
     def execute_shortcut(self, hotkey_str: str) -> None:
         if self.enabled and config["z_debug"]:
             tooltip(hotkey_str)
-        shortcuts = config["hotkeys"]
+        shortcuts = config["shortcuts"]
         if hotkey_str in shortcuts:
             action_str = shortcuts[hotkey_str]
             if not self.enabled and action_str not in ("on", "on_off"):
