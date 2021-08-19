@@ -11,6 +11,11 @@ from aqt.webview import AnkiWebView
 config = mw.addonManager.getConfig(__name__)
 
 
+def refresh_config() -> None:
+    global config
+    config = mw.addonManager.getConfig(__name__)
+
+
 def turn_on() -> None:
     if not manager.enabled:
         manager.enabled = True

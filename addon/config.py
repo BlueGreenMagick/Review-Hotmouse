@@ -3,7 +3,7 @@ from typing import NamedTuple, Optional, List, Dict, Tuple, Union, Literal
 from aqt.qt import *
 
 from .ankiaddonconfig import *
-from .event import ACTION_OPTS, Button
+from .event import ACTION_OPTS, Button, refresh_config
 
 
 def general_tab(conf_window: ConfigWindow) -> None:
@@ -238,7 +238,12 @@ def hotkey_tabs(conf_window: ConfigWindow) -> None:
     conf_window.execute_on_save(save_hotkeys)
 
 
+def on_window_open(conf_window: ConfigWindow) -> None:
+    conf_window.execute_on_close(refresh_config)
+
+
 conf = ConfigManager()
 conf.use_custom_window()
+conf.on_window_open(on_window_open)
 conf.add_config_tab(general_tab)
 conf.add_config_tab(hotkey_tabs)
