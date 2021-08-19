@@ -28,6 +28,15 @@ def turn_off() -> None:
         tooltip("Disabled hotmouse")
 
 
+def toggle_on_off() -> None:
+    if manager.enabled:
+        manager.enabled = False
+        tooltip("Disabled hotmouse")
+    else:
+        manager.enabled = True
+        tooltip("Enabled hotmouse")
+
+
 def answer_hard() -> None:
     cnt = mw.col.sched.answerButtons(mw.reviewer.card)
     if cnt == 4:
@@ -54,7 +63,9 @@ def answer_easy() -> None:
 
 ACTIONS = {
     "<none>": lambda: None,
+    "on": turn_on,
     "off": turn_off,
+    "on_off": toggle_on_off,
     "undo": mw.onUndo,
     "show_ans": mw.reviewer._getTypedAnswer,
     "again": lambda: mw.reviewer._answerCard(1),
@@ -94,7 +105,6 @@ class WheelDir(Enum):
 class HotmouseManager:
     def __init__(self) -> None:
         self.enabled = True
-        self.ready = True
         self.last_scroll_time = datetime.datetime.now()
 
     @staticmethod
@@ -107,14 +117,13 @@ class HotmouseManager:
                 buttons.append(b)
         return buttons
 
-    def mouse_shortcut(
-        self,
+    @staticmethod
+    def build_hotkey(
         btns: List[Button],
         wheel: Optional[WheelDir] = None,
         click: Optional[Button] = None,
-    ) -> None:
-        """wheel and click should not be passed an argument together!"""
-        # build shortcut string
+    ) -> str:
+        """One and only one of wheel or click must be passed as an argument."""
         if mw.reviewer.state == "question":
             shortcut_key_str = "q"
         elif mw.reviewer.state == "answer":
@@ -127,21 +136,21 @@ class HotmouseManager:
             shortcut_key_str += "_wheel_up"
         elif wheel == WheelDir.DOWN:
             shortcut_key_str += "_wheel_down"
-        if config["z_debug"]:
-            tooltip(shortcut_key_str)
+        return shortcut_key_str
 
-        # check if shortcut exist, run designated action if it does
-        if shortcut_key_str in config:
-            action_str = config[shortcut_key_str]
-            ACTIONS[action_str]()
-            if click:
-                self.ready = False
+    def execute_shortcut(self, hotkey_str: str) -> None:
+        if self.enabled and config["z_debug"]:
+            tooltip(hotkey_str)
+        shortcuts = config["hotkeys"]
+        if hotkey_str in shortcuts:
+            action_str = shortcuts[hotkey_str]
+            if not self.enabled and action_str not in ("on", "on_off"):
+                return
             if config["tooltip"]:
                 tooltip(action_str)
+            ACTIONS[action_str]()
 
     def on_mouse_press(self, event: QMouseEvent) -> None:
-        if not self.ready:
-            return
         btns = self.get_pressed_buttons(event)
         btn = event.button()
         try:
@@ -150,36 +159,30 @@ class HotmouseManager:
         except ValueError:  # Ignore unknown button
             print(f"Review Hotmouse: Unknown Button Pressed: {btn}")
             return
-        self.mouse_shortcut(btns, click=pressed)
-
-    def on_mouse_release(self, event: QMouseEvent) -> None:
-        btns = self.get_pressed_buttons(event)
-        if len(btns) == 1:  # released all mouse buttons
-            self.ready = True
+        hotkey_str = self.build_hotkey(btns, click=pressed)
+        self.execute_shortcut(hotkey_str)
 
     def on_mouse_scroll(self, event: QWheelEvent) -> None:
-        if not self.ready:
-            return
         curr_time = datetime.datetime.now()
         time_diff = curr_time - self.last_scroll_time
         if time_diff.total_seconds() * 1000 > config["threshold_wheel_ms"]:
             btns = self.get_pressed_buttons(event)
             angle_delta = event.angleDelta().y()
             if angle_delta > 0:
-                self.mouse_shortcut(btns, WheelDir.UP)
+                wheel_dir = WheelDir.UP
             elif angle_delta < 0:
-                self.mouse_shortcut(btns, WheelDir.DOWN)
+                wheel_dir = WheelDir.DOWN
+            hotkey_str = self.build_hotkey(btns, wheel=wheel_dir)
+            self.execute_shortcut(hotkey_str)
         self.last_scroll_time = curr_time
 
 
 # MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets.
 @no_type_check
 def event_filter(target: AnkiWebView, obj: QObject, event: QEvent) -> Any:
-    if mw.state == "review" and manager.enabled:
+    if mw.state == "review":
         if event.type() == QEvent.MouseButtonPress:
             manager.on_mouse_press(event)
-        elif event.type() == QEvent.MouseButtonRelease:
-            manager.on_mouse_release(event)
         elif event.type() == QEvent.Wheel:
             manager.on_mouse_scroll(event)
 
