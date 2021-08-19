@@ -194,8 +194,9 @@ def on_context_menu(
     ev: QContextMenuEvent,
     _old: Callable[[Any, Any], Any] = lambda t, e: None,
 ) -> None:
-    if manager.enabled:
+    if manager.enabled and mw.state == "review":
         return
+    _old(target, ev)
 
 
 @no_type_check
