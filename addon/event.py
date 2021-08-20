@@ -10,6 +10,7 @@ from aqt.utils import tooltip
 from aqt.webview import AnkiWebView, WebContent
 import aqt
 
+WEBVIEW_TARGETS = (mw.web, mw.bottomWeb)
 config = mw.addonManager.getConfig(__name__)
 
 
@@ -195,18 +196,25 @@ def event_filter(
     event: QEvent,
     _old: Callable = lambda t, o, e: False,
 ) -> bool:
-    if mw.state == "review":
-        if event.type() == QEvent.MouseButtonPress:
-            # TODO: Check if pressed on the scroll bar
-            manager.on_mouse_press(event)
-            return True
-        elif event.type() == QEvent.Wheel:
-            manager.on_mouse_scroll(event)
-            return True
-    return _old(target, obj, event)
+    if target not in WEBVIEW_TARGETS:
+        return _old(target, obj, event)
+    if mw.state != "review":
+        return _old(target, obj, event)
+
+    if event.type() == QEvent.MouseButtonPress:
+        # TODO: Check if pressed on the scroll bar
+        manager.on_mouse_press(event)
+        return True
+    elif event.type() == QEvent.Wheel:
+        manager.on_mouse_scroll(event)
+        return True
+    else:
+        return _old(target, obj, event)
 
 
 def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
+    if target not in WEBVIEW_TARGETS:
+        return
     if event.added():
         add_event_filter(event.child(), target)
 
@@ -216,8 +224,11 @@ def on_context_menu(
     ev: QContextMenuEvent,
     _old: Callable = lambda t, e: None,
 ) -> None:
-    if manager.enabled and mw.state == "review":
+    if target not in WEBVIEW_TARGETS:
+        _old(target, ev)
         return
+    if manager.enabled and mw.state == "review":
+        return None  # ignore event
     _old(target, ev)
 
 
@@ -248,7 +259,7 @@ def add_event_filter(object: QObject, master: AnkiWebView) -> None:
 
 def on_window_open() -> None:
     installFilters()
-    for target in [mw.web, mw.bottomWeb, mw.toolbarWeb]:
+    for target in WEBVIEW_TARGETS:
         add_event_filter(target, target)
 
 
