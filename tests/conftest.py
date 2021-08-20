@@ -53,6 +53,9 @@ class MockAddonManager:
     def setConfigAction(self, module: str, func: Callable) -> None:
         return None
 
+    def setWebExports(self, module: str, pattern: str) -> None:
+        return None
+
 
 @pytest.fixture(autouse=True)
 def mock_addonmanager(monkeypatch: Any, anki_session: Any) -> None:
