@@ -149,19 +149,27 @@ class HotmouseManager:
             shortcut_key_str += "_wheel_down"
         return shortcut_key_str
 
-    def execute_shortcut(self, hotkey_str: str) -> None:
+    def execute_shortcut(self, hotkey_str: str) -> bool:
+        """Returns True if event should not be propagated."""
         if self.enabled and config["z_debug"]:
             tooltip(hotkey_str)
         shortcuts = config["shortcuts"]
         if hotkey_str in shortcuts:
             action_str = shortcuts[hotkey_str]
-            if not self.enabled and action_str not in ("on", "on_off"):
-                return
-            if config["tooltip"]:
-                tooltip(action_str)
-            ACTIONS[action_str]()
+        else:
+            action_str = ""
 
-    def on_mouse_press(self, event: QMouseEvent) -> None:
+        if not self.enabled and action_str not in ("on", "on_off"):
+            return False
+        if not action_str:
+            return True
+        if config["tooltip"]:
+            tooltip(action_str)
+        ACTIONS[action_str]()
+        return True
+
+    def on_mouse_press(self, event: QMouseEvent) -> bool:
+        """Returns True if event should not propagate."""
         btns = self.get_pressed_buttons(event.buttons())
         btn = event.button()
         try:
@@ -169,23 +177,27 @@ class HotmouseManager:
             btns.remove(pressed)
         except ValueError:  # Ignore unknown button
             print(f"Review Hotmouse: Unknown Button Pressed: {btn}")
-            return
+            return False
         hotkey_str = self.build_hotkey(btns, click=pressed)
-        self.execute_shortcut(hotkey_str)
+        return self.execute_shortcut(hotkey_str)
 
-    def on_mouse_scroll(self, event: QWheelEvent) -> None:
+    def on_mouse_scroll(self, event: QWheelEvent) -> bool:
+        """Returns True if event should not propagate."""
         angle_delta = event.angleDelta().y()
         wheel_dir = WheelDir.from_delta(angle_delta)
-        self.handle_scroll(wheel_dir, event.buttons())
+        return self.handle_scroll(wheel_dir, event.buttons())
 
-    def handle_scroll(self, wheel_dir: WheelDir, qbtns: Qt.MouseButtons) -> None:
+    def handle_scroll(self, wheel_dir: WheelDir, qbtns: Qt.MouseButtons) -> bool:
+        """Returns True if event should not propagate."""
         curr_time = datetime.datetime.now()
         time_diff = curr_time - self.last_scroll_time
         self.last_scroll_time = curr_time
         if time_diff.total_seconds() * 1000 > config["threshold_wheel_ms"]:
             btns = self.get_pressed_buttons(qbtns)
             hotkey_str = self.build_hotkey(btns, wheel=wheel_dir)
-            self.execute_shortcut(hotkey_str)
+            return self.execute_shortcut(hotkey_str)
+        else:
+            return self.enabled
 
 
 # MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets.
@@ -198,18 +210,15 @@ def event_filter(
 ) -> bool:
     if target not in WEBVIEW_TARGETS:
         return _old(target, obj, event)
-    if mw.state != "review":
-        return _old(target, obj, event)
-
-    if event.type() == QEvent.MouseButtonPress:
-        # TODO: Check if pressed on the scroll bar
-        manager.on_mouse_press(event)
-        return True
-    elif event.type() == QEvent.Wheel:
-        manager.on_mouse_scroll(event)
-        return True
-    else:
-        return _old(target, obj, event)
+    if mw.state == "review":
+        if event.type() == QEvent.MouseButtonPress:
+            # TODO: Check if pressed on the scroll bar
+            if manager.on_mouse_press(event):
+                return True
+        elif event.type() == QEvent.Wheel:
+            if manager.on_mouse_scroll(event):
+                return True
+    return _old(target, obj, event)
 
 
 def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
