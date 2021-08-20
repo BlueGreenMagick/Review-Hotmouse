@@ -1,6 +1,8 @@
 # Anki related
 meta.json
 
+run
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
