@@ -246,7 +246,7 @@ def on_context_menu(
 
 
 @no_type_check
-def installFilters() -> None:
+def install_filters() -> None:
     target = AnkiWebView
     if "eventFilter" in vars(target):
         target.eventFilter = wrap(target.eventFilter, event_filter, "around")
@@ -260,6 +260,8 @@ def installFilters() -> None:
         target.contextMenuEvent = wrap(
             target.contextMenuEvent, on_context_menu, "around"
         )
+    else:
+        target.contextMenuEvent = on_context_menu
 
 
 def add_event_filter(object: QObject, master: AnkiWebView) -> None:
@@ -270,13 +272,13 @@ def add_event_filter(object: QObject, master: AnkiWebView) -> None:
         add_event_filter(w, master)
 
 
-def on_window_open() -> None:
-    installFilters()
+def install_event_handlers() -> None:
+    install_filters()
     for target in WEBVIEW_TARGETS:
         add_event_filter(target, target)
 
 
-def addTurnonAddon(wv: AnkiWebView, m: QMenu) -> None:
+def add_context_menu_action(wv: AnkiWebView, m: QMenu) -> None:
     if mw.state == "review" and not manager.enabled:
         a = m.addAction("Enable Hotmouse")
         a.triggered.connect(turn_on)
@@ -315,8 +317,8 @@ def handle_js_message(
 
 manager = HotmouseManager()
 
-gui_hooks.main_window_did_init.append(on_window_open)
-gui_hooks.webview_will_show_context_menu.append(addTurnonAddon)
+mw.addonManager.setWebExports(__name__, r"web/.*(css|js)")
+gui_hooks.main_window_did_init.append(install_event_handlers)
+gui_hooks.webview_will_show_context_menu.append(add_context_menu_action)
 gui_hooks.webview_will_set_content.append(inject_web_content)
 gui_hooks.webview_did_receive_js_message.append(handle_js_message)
-mw.addonManager.setWebExports(__name__, r"web/.*(css|js)")
