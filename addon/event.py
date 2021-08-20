@@ -1,4 +1,4 @@
-from typing import Any, Callable, List, Optional, Union, no_type_check
+from typing import Any, Callable, List, Optional, Union, Type, no_type_check
 import datetime
 from enum import Enum
 
@@ -179,23 +179,31 @@ class HotmouseManager:
 
 # MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets.
 @no_type_check
-def event_filter(target: AnkiWebView, obj: QObject, event: QEvent) -> Any:
+def event_filter(
+    target: AnkiWebView,
+    obj: QObject,
+    event: QEvent,
+    _old: Callable = lambda t, o, e: False,
+) -> bool:
     if mw.state == "review":
         if event.type() == QEvent.MouseButtonPress:
             manager.on_mouse_press(event)
+            return True
         elif event.type() == QEvent.Wheel:
             manager.on_mouse_scroll(event)
+            return True
+    return _old(target, obj, event)
 
 
-def on_child_event(target: QObject, event: QChildEvent) -> None:
+def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
     if event.added():
-        event.child().installEventFilter(target)
+        add_event_filter(event.child(), target)
 
 
 def on_context_menu(
-    target: QObject,
+    target: QWebEngineView,
     ev: QContextMenuEvent,
-    _old: Callable[[Any, Any], Any] = lambda t, e: None,
+    _old: Callable = lambda t, e: None,
 ) -> None:
     if manager.enabled and mw.state == "review":
         return
@@ -206,7 +214,7 @@ def on_context_menu(
 def installFilters() -> None:
     target = AnkiWebView
     if "eventFilter" in vars(target):
-        target.eventFilter = wrap(target.eventFilter, event_filter, "before")
+        target.eventFilter = wrap(target.eventFilter, event_filter, "around")
     else:
         target.eventFilter = event_filter
     if "childEvent" in vars(target):
@@ -219,17 +227,18 @@ def installFilters() -> None:
         )
 
 
-def add_event_filter_children(parent: QObject, master: AnkiWebView) -> None:
-    child_widgets = parent.children()
-    for w in child_widgets:
-        w.installEventFilter(master)
-        add_event_filter_children(w, master)
+def add_event_filter(object: QWebEngineView, master: AnkiWebView) -> None:
+    """Add event filter to the widget and its children, to master"""
+    object.installEventFilter(master)
+    child_object = object.children()
+    for w in child_object:
+        add_event_filter(w, master)
 
 
 def on_window_open() -> None:
     installFilters()
     for target in [mw.web, mw.bottomWeb, mw.toolbarWeb]:
-        add_event_filter_children(target, target)
+        add_event_filter(target, target)
 
 
 manager = HotmouseManager()
