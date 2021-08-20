@@ -1,12 +1,14 @@
-from typing import Any, Callable, List, Optional, Union, Type, no_type_check
-import datetime
+from typing import Any, Callable, List, Dict, Optional, Union, Tuple, no_type_check
 from enum import Enum
+import datetime
+import json
 
 from anki.hooks import wrap
 from aqt import mw, gui_hooks
 from aqt.qt import *
 from aqt.utils import tooltip
-from aqt.webview import AnkiWebView
+from aqt.webview import AnkiWebView, WebContent
+import aqt
 
 config = mw.addonManager.getConfig(__name__)
 
@@ -101,6 +103,15 @@ class WheelDir(Enum):
     DOWN = -1
     UP = 1
 
+    @classmethod
+    def from_delta(cls, delta: Union[int, float]) -> Optional["WheelDir"]:
+        if delta > 0:
+            return cls.UP
+        elif delta < 0:
+            return cls.DOWN
+        else:
+            return None
+
 
 class HotmouseManager:
     def __init__(self) -> None:
@@ -108,9 +119,8 @@ class HotmouseManager:
         self.last_scroll_time = datetime.datetime.now()
 
     @staticmethod
-    def get_pressed_buttons(event: Union[QMouseEvent, QWheelEvent]) -> List[Button]:
+    def get_pressed_buttons(qbuttons: Qt.MouseButtons) -> List[Button]:
         """Returns list of pressed button names, excluding the button that caused the trigger"""
-        qbuttons = event.buttons()
         buttons = []
         for b in Button:
             if qbuttons & b.value:  # type: ignore
@@ -151,7 +161,7 @@ class HotmouseManager:
             ACTIONS[action_str]()
 
     def on_mouse_press(self, event: QMouseEvent) -> None:
-        btns = self.get_pressed_buttons(event)
+        btns = self.get_pressed_buttons(event.buttons())
         btn = event.button()
         try:
             pressed = Button(event.button())
@@ -163,18 +173,18 @@ class HotmouseManager:
         self.execute_shortcut(hotkey_str)
 
     def on_mouse_scroll(self, event: QWheelEvent) -> None:
+        angle_delta = event.angleDelta().y()
+        wheel_dir = WheelDir.from_delta(angle_delta)
+        self.handle_scroll(wheel_dir, event.buttons())
+
+    def handle_scroll(self, wheel_dir: WheelDir, qbtns: Qt.MouseButtons) -> None:
         curr_time = datetime.datetime.now()
         time_diff = curr_time - self.last_scroll_time
+        self.last_scroll_time = curr_time
         if time_diff.total_seconds() * 1000 > config["threshold_wheel_ms"]:
-            btns = self.get_pressed_buttons(event)
-            angle_delta = event.angleDelta().y()
-            if angle_delta > 0:
-                wheel_dir = WheelDir.UP
-            elif angle_delta < 0:
-                wheel_dir = WheelDir.DOWN
+            btns = self.get_pressed_buttons(qbtns)
             hotkey_str = self.build_hotkey(btns, wheel=wheel_dir)
             self.execute_shortcut(hotkey_str)
-        self.last_scroll_time = curr_time
 
 
 # MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets.
@@ -187,6 +197,7 @@ def event_filter(
 ) -> bool:
     if mw.state == "review":
         if event.type() == QEvent.MouseButtonPress:
+            # TODO: Check if pressed on the scroll bar
             manager.on_mouse_press(event)
             return True
         elif event.type() == QEvent.Wheel:
@@ -227,7 +238,7 @@ def installFilters() -> None:
         )
 
 
-def add_event_filter(object: QWebEngineView, master: AnkiWebView) -> None:
+def add_event_filter(object: QObject, master: AnkiWebView) -> None:
     """Add event filter to the widget and its children, to master"""
     object.installEventFilter(master)
     child_object = object.children()
@@ -241,14 +252,47 @@ def on_window_open() -> None:
         add_event_filter(target, target)
 
 
-manager = HotmouseManager()
-
-
 def addTurnonAddon(wv: AnkiWebView, m: QMenu) -> None:
     if mw.state == "review" and not manager.enabled:
         a = m.addAction("Enable Hotmouse")
         a.triggered.connect(turn_on)
 
 
+def inject_web_content(web_content: WebContent, context: Optional[Any]) -> None:
+    """Wheel events are not reliably detected with qt's event handler
+    when the reviewer is scrollable. (For long cards)
+    """
+    if not isinstance(context, aqt.reviewer.Reviewer):
+        return
+    addon_package = mw.addonManager.addonFromModule(__name__)
+    web_content.js.append(f"/_addons/{addon_package}/web/detect_wheel.js")
+
+
+def handle_js_message(
+    handled: Tuple[bool, Any], message: str, context: Any
+) -> Tuple[bool, Any]:
+    """Receive pycmd message."""
+    if not isinstance(context, aqt.reviewer.Reviewer):
+        return handled
+    addon_key = "ReviewHotmouse#"
+    if not message.startswith(addon_key):
+        return handled
+
+    req = json.loads(message[len(addon_key) :])  # type: Dict[str, Any]
+    if req["key"] == "wheel":
+        wheel_delta = req["value"]  # type: int
+        wheel_dir = WheelDir.from_delta(wheel_delta)
+        qbtns = mw.app.mouseButtons()
+        manager.handle_scroll(wheel_dir, qbtns)
+        return (True, True)
+
+    return handled
+
+
+manager = HotmouseManager()
+
 gui_hooks.main_window_did_init.append(on_window_open)
 gui_hooks.webview_will_show_context_menu.append(addTurnonAddon)
+gui_hooks.webview_will_set_content.append(inject_web_content)
+gui_hooks.webview_did_receive_js_message.append(handle_js_message)
+mw.addonManager.setWebExports(__name__, r"web/.*(css|js)")
