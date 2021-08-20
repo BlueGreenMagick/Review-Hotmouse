@@ -150,7 +150,7 @@ class HotmouseManager:
         return shortcut_key_str
 
     def execute_shortcut(self, hotkey_str: str) -> bool:
-        """Returns True if event should not be propagated."""
+        """Returns True if shortcut exists and is executed."""
         if self.enabled and config["z_debug"]:
             tooltip(hotkey_str)
         shortcuts = config["shortcuts"]
@@ -162,14 +162,14 @@ class HotmouseManager:
         if not self.enabled and action_str not in ("on", "on_off"):
             return False
         if not action_str:
-            return True
+            return False
         if config["tooltip"]:
             tooltip(action_str)
         ACTIONS[action_str]()
         return True
 
     def on_mouse_press(self, event: QMouseEvent) -> bool:
-        """Returns True if event should not propagate."""
+        """Returns True if shortcut is executed"""
         btns = self.get_pressed_buttons(event.buttons())
         btn = event.button()
         try:
@@ -182,13 +182,13 @@ class HotmouseManager:
         return self.execute_shortcut(hotkey_str)
 
     def on_mouse_scroll(self, event: QWheelEvent) -> bool:
-        """Returns True if event should not propagate."""
+        """Returns True if shortcut is executed"""
         angle_delta = event.angleDelta().y()
         wheel_dir = WheelDir.from_delta(angle_delta)
         return self.handle_scroll(wheel_dir, event.buttons())
 
     def handle_scroll(self, wheel_dir: WheelDir, qbtns: Qt.MouseButtons) -> bool:
-        """Returns True if event should not propagate."""
+        """Returns True if shortcut is executed"""
         curr_time = datetime.datetime.now()
         time_diff = curr_time - self.last_scroll_time
         self.last_scroll_time = curr_time
@@ -200,7 +200,6 @@ class HotmouseManager:
             return self.enabled
 
 
-# MousePress and MouseRelease events on QWebEngineView is not triggered, only on its child widgets.
 @no_type_check
 def event_filter(
     target: AnkiWebView,
@@ -208,11 +207,16 @@ def event_filter(
     event: QEvent,
     _old: Callable = lambda t, o, e: False,
 ) -> bool:
+    """Because Mouse events are triggered on QWebEngineView's child widgets.
+
+    Event propagation is only stopped when shortcut is triggered.
+    This is so clicking on answer buttons and selecting text works.
+    And `left_click` shortcut should be discouraged because of above.
+    """
     if target not in WEBVIEW_TARGETS:
         return _old(target, obj, event)
     if mw.state == "review":
         if event.type() == QEvent.MouseButtonPress:
-            # TODO: Check if pressed on the scroll bar
             if manager.on_mouse_press(event):
                 return True
         elif event.type() == QEvent.Wheel:
