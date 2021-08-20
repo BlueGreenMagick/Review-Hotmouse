@@ -1,5 +1,7 @@
 from typing import Type
 from pathlib import Path
+import os
+
 from aqt import mw
 
 from .compat import compat
@@ -45,16 +47,16 @@ class Version:
         return self == other or self < other
 
 
-# version of the add-on prior to running this script
-prev_version = Version()
-
-# Save current version
-version_file = Path(__file__).parent / "VERSION"
-version_string = version_file.read_text()
-if version_string != prev_version:
-    config["version"]["major"] = int(version_string.split(".")[0])
-    config["version"]["minor"] = int(version_string.split(".")[1])
-    mw.addonManager.writeConfig(__name__, config)
+def save_current_version_to_conf() -> None:
+    # For debugging
+    version_string = os.environ.get("REVIEW_HOTMOUSE_VERSION")
+    if not version_string:
+        version_file = Path(__file__).parent / "VERSION"
+        version_string = version_file.read_text()
+    if version_string != prev_version:
+        config["version"]["major"] = int(version_string.split(".")[0])
+        config["version"]["minor"] = int(version_string.split(".")[1])
+        mw.addonManager.writeConfig(__name__, config)
 
 
 def detect_version() -> Version:
@@ -66,6 +68,11 @@ def detect_version() -> Version:
     else:
         return Version.from_string("-1.-1")
 
+
+# version of the add-on prior to running this script
+prev_version = Version()
+
+save_current_version_to_conf()
 
 if prev_version == "-1.-1":
     prev_version = detect_version()
