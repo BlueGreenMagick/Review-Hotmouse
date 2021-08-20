@@ -10,6 +10,8 @@ on:
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    env:
+      ADDON_FILE_NAME: review_hotmouse_v${{ github.event.inputs.version }}.ankiaddon
     steps:
       - uses: actions/checkout@v2
         with: 
@@ -36,12 +38,12 @@ jobs:
         run: cp LICENSE README.md addon/
           
       - name: Create ankiaddon file
-        run: cd addon ; zip -r ../../review_hotmouse_v${{ github.event.inputs.version }}.ankiaddon * ; cd ../
+        run: cd addon ; zip -r ../${{ env.ADDON_FILE_NAME }} * ; cd ../
       
       - name: Create github release and upload ankiaddon file
         uses: svenstaro/upload-release-action@2.2.1
         with:
           repo_token: ${{ github.token }}
-          file: "recolor_v${{ github.event.inputs.version }}.ankiaddon"
+          file: ${{ env.ADDON_FILE_NAME }}
           tag: ${{ github.event.inputs.version }}
           release_name: Review Hotmouse v${{ github.event.inputs.version }}
