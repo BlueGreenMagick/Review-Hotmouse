@@ -185,6 +185,8 @@ class HotmouseManager:
         """Returns True if shortcut is executed"""
         angle_delta = event.angleDelta().y()
         wheel_dir = WheelDir.from_delta(angle_delta)
+        if wheel_dir is None:
+            return False
         return self.handle_scroll(wheel_dir, event.buttons())
 
     def handle_scroll(self, wheel_dir: WheelDir, qbtns: Qt.MouseButtons) -> bool:
@@ -297,7 +299,7 @@ def inject_web_content(web_content: WebContent, context: Optional[Any]) -> None:
 def handle_js_message(
     handled: Tuple[bool, Any], message: str, context: Any
 ) -> Tuple[bool, Any]:
-    """Receive pycmd message."""
+    """Receive pycmd message. Returns (handled?, return_value)"""
     if not isinstance(context, aqt.reviewer.Reviewer):
         return handled
     addon_key = "ReviewHotmouse#"
@@ -308,9 +310,11 @@ def handle_js_message(
     if req["key"] == "wheel":
         wheel_delta = req["value"]  # type: int
         wheel_dir = WheelDir.from_delta(wheel_delta)
+        if wheel_dir is None:
+            return (False, None)
         qbtns = mw.app.mouseButtons()
-        manager.handle_scroll(wheel_dir, qbtns)
-        return (True, True)
+        executed = manager.handle_scroll(wheel_dir, qbtns)
+        return (executed, executed)
 
     return handled
 
