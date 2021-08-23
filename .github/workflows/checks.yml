@@ -17,7 +17,7 @@ jobs:
          submodules: recursive
 
       - name: Install Python dependencies
-        run: python -m pip install aqt pyqt5-stubs mypy black pytest git+https://github.com/glutanimate/pytest-anki.git
+        run: python -m pip install aqt pyqt5-stubs mypy black
 
 
       - name: Run mypy
