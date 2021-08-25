@@ -24,7 +24,7 @@
 **input types**
 
 - `press` : Buttons being pressed when triggered.
-- `click` : Triggered when this button is pressed.
+- `click` : Trigger shortcut when this button is pressed.
 - `wheel` : Scrolling inputs.
 
 **Shortcut Syntax**:
@@ -42,6 +42,8 @@ When shortcut has multiple `press\_button`s, the buttons must be in the same ord
 - `<none>`: Does nothing
 - `undo` 
 - `off`
+- `on`
+- `on_off`
 - `again`
 - `hard`
 - `good`
