@@ -19,6 +19,9 @@ jobs:
       ADDON_FILE_NAME: review_hotmouse_v${{ github.event.inputs.version }}.ankiaddon
 
     steps:
+      - name: Version is ${{ github.event.inputs.version }}
+        run: ""
+        
       - uses: actions/checkout@v2
         with: 
           submodules: recursive
