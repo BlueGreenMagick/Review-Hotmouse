@@ -43,6 +43,12 @@ def test_v1_compat() -> None:
         "z_debug": False,
     }
 
+    old_config = {"q_press_left": "on", "q_click_left": "off"}
+    mw.addonManager.writeConfig(__name__, old_config)
+    v1_compat()
+    config = mw.addonManager.getConfig(__name__)
+    assert config == {"shortcuts": {"q_click_left": "off"}}
+
 
 def test_modify_empty_action_shortcuts() -> None:
     from addon.compat.v1 import modify_empty_action_shortcuts

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 from aqt import mw
 from aqt.utils import showText
@@ -17,8 +17,9 @@ def v1_compat() -> None:
     """
     shortcuts = get_and_remove_v1_shortcuts_from_config()
     modify_empty_action_shortcuts(shortcuts)
-    modified = modify_hotkeys_ending_with_press(shortcuts)
-    removed = remove_invalid_shortcuts(shortcuts)
+    (modified, removed) = modify_hotkeys_ending_with_press(shortcuts)
+    removed2 = remove_invalid_shortcuts(shortcuts)
+    removed.update(removed2)
     config = mw.addonManager.getConfig(__name__)
     config["shortcuts"] = shortcuts
     mw.addonManager.writeConfig(__name__, config)
@@ -60,11 +61,16 @@ def modify_empty_action_shortcuts(shortcuts: Dict[str, str]) -> None:
             shortcuts[hotkey] = "<none>"
 
 
-def modify_hotkeys_ending_with_press(shortcuts: Dict[str, str]) -> Dict[str, str]:
+def modify_hotkeys_ending_with_press(
+    shortcuts: Dict[str, str]
+) -> Tuple[Dict[str, str], Dict[str, str]]:
     """Modifies hotkeys ending with "press" to "click". Returns modified.
 
     If another shortcut ending with "click" exists, it is skipped.
     """
+    modified = {}
+    removed = {}
+
     to_modify = {}
     for hotkey in shortcuts:
         hotkeylist = hotkey.split("_")
@@ -78,9 +84,13 @@ def modify_hotkeys_ending_with_press(shortcuts: Dict[str, str]) -> Dict[str, str
 
     for hotkey in to_modify:
         new_hotkey = to_modify[hotkey]
-        if new_hotkey not in shortcuts:
+        if new_hotkey in shortcuts:
+            removed[hotkey] = shortcuts.pop(hotkey)
+        else:
             shortcuts[new_hotkey] = shortcuts.pop(hotkey)
-    return to_modify
+            modified[hotkey] = new_hotkey
+
+    return (modified, removed)
 
 
 def is_valid_hotkey(hotkey: str) -> bool:
