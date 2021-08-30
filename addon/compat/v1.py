@@ -133,13 +133,19 @@ def inform_v1_shortcuts_modified(mod: Dict[str, str], rem: Dict[str, str]) -> No
     - rem: {hotkey: action}
     """
     base = (
-        "<h3>Review Hotmouse (add-on)</h3>"
-        "Some shortcuts were invalid, and were modified or removed for compatibility."
-        "<br>"
+        "<h3>Review Hotmouse Update Notes</h3>"
+        "Some shortcuts were invalid, and were modified or removed for compatibility. "
         "This may be because the shortcut wasn't valid in the first case, "
         "or it is no longer valid after updating."
         "<br>"
+        "For example, 'press' only hotkeys are no longer valid "
+        "and hotkeys must now contain either 'click' or 'wheel'."
+        "<br><br>"
+        "If you are not sure why a shortcut was modified or deleted, please create an issue at the "
+        '<a href="https://github.com/BlueGreenMagick/Review-Hotmouse/issues">Github repo</a>.'
+        "<br>"
         "{mod}"
+        "<br>"
         "{rem}"
     )
     mod_msg = ""
