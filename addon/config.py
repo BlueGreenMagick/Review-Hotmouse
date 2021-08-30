@@ -228,7 +228,7 @@ class HotkeyTabManager:
 def hotkey_tabs(conf_window: ConfigWindow) -> None:
     q_tab = conf_window.add_tab("Question Hotkeys")
     q_manager = HotkeyTabManager(q_tab, "q")
-    a_tab = conf_window.add_tab("AnswerHotkeys")
+    a_tab = conf_window.add_tab("Answer Hotkeys")
     a_manager = HotkeyTabManager(a_tab, "a")
     conf_window.widget_updates.append(q_manager.on_update)
     conf_window.widget_updates.append(a_manager.on_update)
