@@ -147,7 +147,7 @@ def inform_v1_shortcuts_modified(mod: Dict[str, str], rem: Dict[str, str]) -> No
         "Some shortcuts were invalid, and were modified or removed for compatibility. "
         "This may be because the shortcut wasn't valid in the first case, "
         "or it is no longer valid after updating."
-        "<br>"
+        "<br><br>"
         "For example, 'press' only hotkeys are no longer valid "
         "and hotkeys must now contain either 'click' or 'wheel'."
         "<br><br>"
