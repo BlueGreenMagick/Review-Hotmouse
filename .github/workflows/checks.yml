@@ -17,11 +17,13 @@ jobs:
          submodules: recursive
 
       - name: Install Python dependencies
-        run: python -m pip install aqt pyqt5-stubs mypy black
-
-
-      - name: Run mypy
-        run: mypy --install-types --non-interactive addon/
+        run: python -m pip install aqt pyqt5-stubs mypy black pytest unittest
 
       - name: Run black
         run: black --check .
+
+      - name: Run mypy
+        run: mypy --install-types --non-interactive addon/
+      
+      - name: Run pytest
+        run: pytest -v .

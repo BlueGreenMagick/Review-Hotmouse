@@ -1,6 +1,6 @@
-from typing import Callable, Dict, Any, Iterator
+from typing import Callable, Dict, Any
 from pathlib import Path
-from pytest_anki import anki_running, AnkiSession
+from unittest.mock import Mock
 import pytest
 import json
 import sys
@@ -12,13 +12,6 @@ from aqt.addons import AddonMeta
 project_path = Path(__file__).parent.parent
 addon_path = project_path / "addon"
 sys.path.append(str(project_path))
-
-# Not sure why, but is needed to remove errors.
-@pytest.fixture(scope="session", autouse=True)
-def anki_session(request: Any) -> Iterator[AnkiSession]:
-    param = getattr(request, "param", None)
-    with anki_running() if not param else anki_running(**param) as session:
-        yield session
 
 
 class MockAddonManager:
@@ -58,13 +51,14 @@ class MockAddonManager:
 
 
 @pytest.fixture(autouse=True)
-def mock_addonmanager(monkeypatch: Any, anki_session: Any) -> None:
+def mock_addonmanager(monkeypatch: Any) -> None:
     """Mock mw.addonManager"""
-    addon_manager = MockAddonManager()
-    monkeypatch.setattr(anki_session.mw, "addonManager", addon_manager)
+    mw = Mock()
+    mw.configure_mock(addonManager=MockAddonManager())
+    monkeypatch.setattr(aqt, "mw", mw)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def dont_show_aqt_utils_gui() -> None:
     for fn_name in ("showText", "showInfo"):
         setattr(aqt.utils, fn_name, lambda *_, **__: None)

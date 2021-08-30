@@ -8,7 +8,6 @@ git submodule update --init --recursive
 
 ## Tests & Formatting
 This project uses [black], [mypy](https://github.com/python/mypy), and [pytest].
-pytest is very finnicky so don't sweat it if you can't get it to run.
 
 ```
 black .
@@ -18,7 +17,7 @@ pytest .
 
 You will need to install the following python packages to run black, mypy and pytest: 
 ```
-pip install black aqt pyqt5-stubs mypy pytest git+https://github.com/glutanimate/pytest-anki.git
+pip install aqt pyqt5-stubs mypy black pytest unittest
 ```
 
 # Building ankiaddon file

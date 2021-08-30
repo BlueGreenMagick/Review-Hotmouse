@@ -1,10 +1,6 @@
-from typing import Any
-
-
-def test_v1_compat(anki_session: Any) -> None:
+def test_v1_compat() -> None:
+    from aqt import mw
     from addon.compat.v1 import v1_compat
-
-    mw = anki_session.mw
 
     old_config = {
         "q_press_left_press_right_press_middle": "off",  # press
