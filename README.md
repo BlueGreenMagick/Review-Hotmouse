@@ -17,7 +17,7 @@ pytest .
 
 You will need to install the following python packages to run black, mypy and pytest: 
 ```
-pip install aqt pyqt5-stubs mypy black pytest unittest
+pip install aqt pyqt5-stubs mypy black pytest
 ```
 
 # Building ankiaddon file

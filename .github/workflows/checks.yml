@@ -17,7 +17,7 @@ jobs:
          submodules: recursive
 
       - name: Install Python dependencies
-        run: python -m pip install aqt pyqt5-stubs mypy black pytest unittest
+        run: python -m pip install aqt pyqt5-stubs mypy black pytest
 
       - name: Run black
         run: black --check .
