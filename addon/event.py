@@ -10,7 +10,13 @@ from aqt.utils import tooltip
 from aqt.webview import AnkiWebView, WebContent
 import aqt
 
-WEBVIEW_TARGETS = (mw.web, mw.bottomWeb)
+
+def WEBVIEW_TARGETS() -> List[AnkiWebView]:
+    # Implemented as a function so attributes are resolved when called.
+    # In case mw.web is reassigned to a different object
+    return [mw.web, mw.bottomWeb]
+
+
 config = mw.addonManager.getConfig(__name__)
 
 
@@ -69,25 +75,25 @@ ACTIONS = {
     "on": turn_on,
     "off": turn_off,
     "on_off": toggle_on_off,
-    "undo": mw.onUndo,
-    "show_ans": mw.reviewer._getTypedAnswer,
+    "undo": lambda: mw.onUndo(),
+    "show_ans": lambda: mw.reviewer._getTypedAnswer(),
     "again": lambda: mw.reviewer._answerCard(1),
     "hard": answer_hard,
     "good": answer_good,
     "easy": answer_easy,
-    "delete": mw.reviewer.onDelete,
-    "suspend_card": mw.reviewer.onSuspendCard,
-    "suspend_note": mw.reviewer.onSuspend,
-    "bury_card": mw.reviewer.onBuryCard,
-    "bury_note": mw.reviewer.onBuryNote,
-    "mark": mw.reviewer.onMark,
+    "delete": lambda: mw.reviewer.onDelete(),
+    "suspend_card": lambda: mw.reviewer.onSuspendCard(),
+    "suspend_note": lambda: mw.reviewer.onSuspend(),
+    "bury_card": lambda: mw.reviewer.onBuryCard(),
+    "bury_note": lambda: mw.reviewer.onBuryNote(),
+    "mark": lambda: mw.reviewer.onMark(),
     "red": lambda: mw.reviewer.setFlag(1),
     "orange": lambda: mw.reviewer.setFlag(2),
     "green": lambda: mw.reviewer.setFlag(3),
     "blue": lambda: mw.reviewer.setFlag(4),
-    "audio": mw.reviewer.replayAudio,
-    "record_voice": mw.reviewer.onRecordVoice,
-    "replay_voice": mw.reviewer.onReplayRecorded,
+    "audio": lambda: mw.reviewer.replayAudio(),
+    "record_voice": lambda: mw.reviewer.onRecordVoice(),
+    "replay_voice": lambda: mw.reviewer.onReplayRecorded(),
 }
 ACTION_OPTS = list(ACTIONS.keys())
 
@@ -215,7 +221,7 @@ def event_filter(
     This is so clicking on answer buttons and selecting text works.
     And `left_click` shortcut should be discouraged because of above.
     """
-    if target not in WEBVIEW_TARGETS:
+    if target not in WEBVIEW_TARGETS():
         return _old(target, obj, event)
     if mw.state == "review":
         if event.type() == QEvent.MouseButtonPress:
@@ -228,7 +234,7 @@ def event_filter(
 
 
 def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
-    if target not in WEBVIEW_TARGETS:
+    if target not in WEBVIEW_TARGETS():
         return
     if event.added():
         add_event_filter(event.child(), target)
@@ -239,7 +245,7 @@ def on_context_menu(
     ev: QContextMenuEvent,
     _old: Callable = lambda t, e: None,
 ) -> None:
-    if target not in WEBVIEW_TARGETS:
+    if target not in WEBVIEW_TARGETS():
         _old(target, ev)
         return
     if manager.enabled and mw.state == "review":
@@ -276,7 +282,7 @@ def add_event_filter(object: QObject, master: AnkiWebView) -> None:
 
 def install_event_handlers() -> None:
     install_filters()
-    for target in WEBVIEW_TARGETS:
+    for target in WEBVIEW_TARGETS():
         add_event_filter(target, target)
 
 
