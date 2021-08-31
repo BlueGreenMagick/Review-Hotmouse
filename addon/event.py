@@ -328,7 +328,7 @@ def handle_js_message(
 manager = HotmouseManager()
 
 mw.addonManager.setWebExports(__name__, r"web/.*(css|js)")
-gui_hooks.main_window_did_init.append(install_event_handlers)
-gui_hooks.webview_will_show_context_menu.append(add_context_menu_action)
-gui_hooks.webview_will_set_content.append(inject_web_content)
-gui_hooks.webview_did_receive_js_message.append(handle_js_message)
+gui_hooks.main_window_did_init.append(install_event_handlers)  # 2.1.28
+gui_hooks.webview_will_show_context_menu.append(add_context_menu_action)  # 2.1.20
+gui_hooks.webview_will_set_content.append(inject_web_content)  # 2.1.22
+gui_hooks.webview_did_receive_js_message.append(handle_js_message)  # 2.1.20
