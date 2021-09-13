@@ -111,10 +111,21 @@ class WheelDir(Enum):
     UP = 1
 
     @classmethod
-    def from_delta(cls, delta: Union[int, float]) -> Optional["WheelDir"]:
+    def from_qt(cls, angle_delta: QPoint) -> Optional["WheelDir"]:
+        delta = angle_delta.y()
         if delta > 0:
             return cls.UP
         elif delta < 0:
+            return cls.DOWN
+        else:
+            return None
+
+    @classmethod
+    def from_web(cls, delta: int) -> Optional["WheelDir"]:
+        """web and qt has opposite delta sign"""
+        if delta < 0:
+            return cls.UP
+        elif delta > 0:
             return cls.DOWN
         else:
             return None
@@ -189,8 +200,7 @@ class HotmouseManager:
 
     def on_mouse_scroll(self, event: QWheelEvent) -> bool:
         """Returns True if shortcut is executed"""
-        angle_delta = event.angleDelta().y()
-        wheel_dir = WheelDir.from_delta(angle_delta)
+        wheel_dir = WheelDir.from_qt(event.angleDelta())
         if wheel_dir is None:
             return False
         return self.handle_scroll(wheel_dir, event.buttons())
@@ -315,7 +325,7 @@ def handle_js_message(
     req = json.loads(message[len(addon_key) :])  # type: Dict[str, Any]
     if req["key"] == "wheel":
         wheel_delta = req["value"]  # type: int
-        wheel_dir = WheelDir.from_delta(wheel_delta)
+        wheel_dir = WheelDir.from_web(wheel_delta)
         if wheel_dir is None:
             return (False, None)
         qbtns = mw.app.mouseButtons()
