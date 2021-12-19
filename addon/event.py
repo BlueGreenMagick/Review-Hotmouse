@@ -75,7 +75,7 @@ ACTIONS = {
     "on": turn_on,
     "off": turn_off,
     "on_off": toggle_on_off,
-    "undo": lambda: mw.onUndo(),
+    "undo": lambda: mw.onUndo() if mw.form.actionUndo.isEnabled() else None,
     "show_ans": lambda: mw.reviewer._getTypedAnswer(),
     "again": lambda: mw.reviewer._answerCard(1),
     "hard": answer_hard,
