@@ -97,7 +97,7 @@ class HotkeyTabManager:
             lambda _: self.add_row(f"{self.side}_click_right", "<none>")
         )
         add_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        add_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        add_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         btn_layout.addWidget(add_btn)
         btn_layout.stretch()
         btn_layout.setContentsMargins(0, 20, 0, 5)
@@ -177,7 +177,7 @@ class HotkeyTabManager:
             label = QLabel(
                 "&nbsp;<a href='/' style='text-decoration:none; color: red;'>⌫</a>"
             )
-            label.setTextFormat(Qt.RichText)
+            label.setTextFormat(Qt.TextFormat.RichText)
             label.setToolTip("Delete this shortcut.")
             layout.addWidget(label)
 

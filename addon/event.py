@@ -99,11 +99,11 @@ ACTION_OPTS = list(ACTIONS.keys())
 
 
 class Button(Enum):
-    left = Qt.LeftButton
-    right = Qt.RightButton
-    middle = Qt.MiddleButton
-    xbutton1 = Qt.XButton1
-    xbutton2 = Qt.XButton2
+    left = Qt.MouseButton.LeftButton
+    right = Qt.MouseButton.RightButton
+    middle = Qt.MouseButton.MiddleButton
+    xbutton1 = Qt.MouseButton.XButton1
+    xbutton2 = Qt.MouseButton.XButton2
 
 
 class WheelDir(Enum):
