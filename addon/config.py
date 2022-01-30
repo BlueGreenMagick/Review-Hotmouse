@@ -63,14 +63,18 @@ class DDConfigLayout(ConfigLayout):
         mode = OPTS.mode[optidx]
         dropdowns = self.dropdowns
         if mode == "press":
-            self.removeWidget(dropdowns.pop(ddidx + 1))
+            dd = dropdowns.pop(ddidx + 1)
+            self.removeWidget(dd)
+            dd.deleteLater()
             self.create_dropdown(OPTS.button[0], OPTS.button)
             self.create_dropdown("click", OPTS.mode, is_mode=True)
             self.create_dropdown(OPTS.button[0], OPTS.button)
         else:
             while len(dropdowns) > ddidx + 1:
                 # make this the last dropdown
-                self.removeWidget(dropdowns.pop())
+                dd = dropdowns.pop()
+                self.removeWidget(dd)
+                dd.deleteLater()
             if mode == "click":
                 self.create_dropdown(OPTS.button[0], OPTS.button)
             else:  # mode == "wheel"
