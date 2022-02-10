@@ -234,10 +234,10 @@ def event_filter(
     if target not in WEBVIEW_TARGETS():
         return _old(target, obj, event)
     if mw.state == "review":
-        if event.type() == QEvent.MouseButtonPress:
+        if event.type() == QEvent.Type.MouseButtonPress:
             if manager.on_mouse_press(event):
                 return True
-        elif event.type() == QEvent.Wheel:
+        elif event.type() == QEvent.Type.Wheel:
             if manager.on_mouse_scroll(event):
                 return True
     return _old(target, obj, event)

@@ -40,7 +40,7 @@ OPTS = Options(
 
 class DDConfigLayout(ConfigLayout):
     def __init__(self, conf_window: ConfigWindow):
-        super().__init__(conf_window, QBoxLayout.LeftToRight)
+        super().__init__(conf_window, QBoxLayout.Direction.LeftToRight)
         self.dropdowns: List[QComboBox] = []
 
     def create_dropdown(
@@ -100,7 +100,7 @@ class HotkeyTabManager:
         add_btn.clicked.connect(
             lambda _: self.add_row(f"{self.side}_click_right", "<none>")
         )
-        add_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        add_btn.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         add_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         btn_layout.addWidget(add_btn)
         btn_layout.stretch()
