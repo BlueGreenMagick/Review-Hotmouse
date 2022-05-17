@@ -27,22 +27,22 @@ def refresh_config() -> None:
 
 def turn_on() -> None:
     if not manager.enabled:
-        manager.enabled = True
+        manager.enable()
         tooltip("Enabled hotmouse")
 
 
 def turn_off() -> None:
     if manager.enabled:
-        manager.enabled = False
+        manager.disable()
         tooltip("Disabled hotmouse")
 
 
 def toggle_on_off() -> None:
     if manager.enabled:
-        manager.enabled = False
+        manager.disable()
         tooltip("Disabled hotmouse")
     else:
-        manager.enabled = True
+        manager.enable()
         tooltip("Enabled hotmouse")
 
 
@@ -147,6 +147,28 @@ class HotmouseManager:
     def __init__(self) -> None:
         self.enabled = config["default_enabled"]
         self.last_scroll_time = datetime.datetime.now()
+        self.add_menu()
+
+    def add_menu(self) -> None:
+        self.action = QAction("Enable/Disable Review Hotmouse", mw)
+        self.action.triggered.connect(toggle_on_off)
+        mw.form.menuTools.addAction(self.action)
+        self.update_menu()
+
+    def update_menu(self) -> None:
+        if self.enabled:
+            label = "Disable Review Hotmouse"
+        else:
+            label = "Enable Review Hotmouse"
+        self.action.setText(label)
+
+    def enable(self) -> None:
+        self.enabled = True
+        self.update_menu()
+
+    def disable(self) -> None:
+        self.enabled = False
+        self.update_menu()
 
     @staticmethod
     def get_pressed_buttons(qbuttons: "Qt.MouseButtons") -> List[Button]:
