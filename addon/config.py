@@ -14,6 +14,11 @@ def general_tab(conf_window: ConfigWindow) -> None:
         tooltip="How long a delay between subsequent scroll actions?",
         maximum=3000,
     )
+    tab.checkbox(
+        "default_enabled",
+        "add-on is enabled at start",
+        "If you uncheck this box, the add-on will start as turned off when Anki is launched",
+    )
     tab.checkbox("tooltip", "When triggered, show action name")
     tab.checkbox("z_debug", "Debugging: Show hotkey on mouse action")
     tab.stretch()

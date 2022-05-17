@@ -10,6 +10,7 @@
         "a_press_middle_wheel_up": "hard",
         "a_press_middle_wheel_down": "easy"
     },
+    "default_enabled": true,
     "threshold_wheel_ms": 350,
     "tooltip": false,
     "z_debug": false,

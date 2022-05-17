@@ -145,7 +145,7 @@ class WheelDir(Enum):
 
 class HotmouseManager:
     def __init__(self) -> None:
-        self.enabled = True
+        self.enabled = config["default_enabled"]
         self.last_scroll_time = datetime.datetime.now()
 
     @staticmethod
