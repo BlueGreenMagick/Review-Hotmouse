@@ -21,7 +21,7 @@ jobs:
           python-version: "3.9"
 
       - name: Install Python dependencies
-        run: python -m pip install aqt pyqt5-stubs mypy black pytest
+        run: python -m pip install aqt pyqt5-stubs mypy black pytest PyQt5 PyQt6
 
       - name: Run black
         run: black --check .
