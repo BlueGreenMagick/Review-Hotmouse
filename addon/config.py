@@ -24,7 +24,6 @@ class Options(NamedTuple):
     button: List[str]
     wheel: List[str]
     action: List[str]
-    question_action: List[str]
 
 
 OPTS = Options(
@@ -32,9 +31,6 @@ OPTS = Options(
     button=[b.name for b in Button],
     wheel=["up", "down"],
     action=ACTION_OPTS,
-    question_action=[
-        a for a in ACTION_OPTS if a not in ("again", "hard", "good", "easy")
-    ],
 )
 
 
@@ -158,10 +154,7 @@ class HotkeyTabManager:
         layout = self.create_layout()
         layout.stretch()
         layout.text("&nbsp;<b>→</b>&nbsp;", html=True)
-        if self.side == "q":
-            act_opts = OPTS.question_action
-        else:
-            act_opts = OPTS.action
+        act_opts = OPTS.action
         layout.create_dropdown(action, act_opts)
         return layout
 

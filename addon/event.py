@@ -46,13 +46,23 @@ def toggle_on_off() -> None:
         tooltip("Enabled hotmouse")
 
 
+def answer_again() -> None:
+    if mw.reviewer.state == "question":
+        mw.reviewer.state = "answer"
+    mw.reviewer._answerCard(1)
+
+
 def answer_hard() -> None:
+    if mw.reviewer.state == "question":
+        mw.reviewer.state = "answer"
     cnt = mw.col.sched.answerButtons(mw.reviewer.card)
     if cnt == 4:
         mw.reviewer._answerCard(2)
 
 
 def answer_good() -> None:
+    if mw.reviewer.state == "question":
+        mw.reviewer.state = "answer"
     cnt = mw.col.sched.answerButtons(mw.reviewer.card)
     if cnt == 2:
         mw.reviewer._answerCard(2)
@@ -63,6 +73,8 @@ def answer_good() -> None:
 
 
 def answer_easy() -> None:
+    if mw.reviewer.state == "question":
+        mw.reviewer.state = "answer"
     cnt = mw.col.sched.answerButtons(mw.reviewer.card)
     if cnt == 3:
         mw.reviewer._answerCard(3)
@@ -77,7 +89,7 @@ ACTIONS = {
     "on_off": toggle_on_off,
     "undo": lambda: mw.onUndo() if mw.form.actionUndo.isEnabled() else None,
     "show_ans": lambda: mw.reviewer._getTypedAnswer(),
-    "again": lambda: mw.reviewer._answerCard(1),
+    "again": answer_again,
     "hard": answer_hard,
     "good": answer_good,
     "easy": answer_easy,
