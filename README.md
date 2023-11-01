@@ -20,11 +20,13 @@ mypy .
 # pytest . (pytest no longer works)
 ```
 
-You will need to install the following python packages to run black, mypy and pytest:
+You will need to install the following python packages to run black, mypy and pytest
 
 ```
-pip install aqt pyqt5-stubs mypy black pytest
+pip install aqt PyQt6 mypy black pytest
 ```
+
+You may need to uninstall `pyqt5-stubs` for mypy to work correctly.
 
 # Building ankiaddon file
 
