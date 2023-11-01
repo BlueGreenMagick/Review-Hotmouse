@@ -31,7 +31,7 @@ pip install aqt pyqt5-stubs mypy black pytest
 After cloning the repo, go into the repo directory and run the following command to install the git submodule [ankiaddonconfig](https://github.com/BlueGreenMagick/ankiaddonconfig/)
 
 ```
-git submodule update --init addon/ankiaddonconfig
+git submodule update --init --remote addon/ankiaddonconfig
 ```
 
 After installing the git submodule, run the following command to create an `review_hotmouse.ankiaddon` file
