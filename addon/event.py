@@ -190,6 +190,9 @@ class HotmouseManager:
             shortcut_key_str = "q"
         elif mw.reviewer.state == "answer":
             shortcut_key_str = "a"
+        else:
+            shortcut_key_str = "x"  # ignore transition
+
         for btn in btns:
             shortcut_key_str += "_press_{}".format(btn.name)
         if click:
