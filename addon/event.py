@@ -255,29 +255,22 @@ class HotmouseManager:
             return self.enabled
 
 
-@no_type_check
-def event_filter(
-    target: AnkiWebView,
-    obj: QObject,
-    event: QEvent,
-    _old: Callable = lambda t, o, e: False,
-) -> bool:
-    """Because Mouse events are triggered on QWebEngineView's child widgets.
+class HotmouseEventFilter(QObject):
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        """Because Mouse events are triggered on QWebEngineView's child widgets.
 
-    Event propagation is only stopped when shortcut is triggered.
-    This is so clicking on answer buttons and selecting text works.
-    And `left_click` shortcut should be discouraged because of above.
-    """
-    if target not in WEBVIEW_TARGETS():
-        return _old(target, obj, event)
-    if mw.state == "review":
-        if event.type() == QEvent.Type.MouseButtonPress:
-            if manager.on_mouse_press(event):
-                return True
-        elif event.type() == QEvent.Type.Wheel:
-            if manager.on_mouse_scroll(event):
-                return True
-    return _old(target, obj, event)
+        Event propagation is only stopped when shortcut is triggered.
+        This is so clicking on answer buttons and selecting text works.
+        And `left_click` shortcut should be discouraged because of above.
+        """
+        if mw.state == "review":
+            if event.type() == QEvent.Type.MouseButtonPress:
+                if manager.on_mouse_press(event):
+                    return True
+            elif event.type() == QEvent.Type.Wheel:
+                if manager.on_mouse_scroll(event):
+                    return True
+        return False
 
 
 def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
@@ -303,10 +296,6 @@ def on_context_menu(
 @no_type_check
 def install_filters() -> None:
     target = AnkiWebView
-    if "eventFilter" in vars(target):
-        target.eventFilter = wrap(target.eventFilter, event_filter, "around")
-    else:
-        target.eventFilter = event_filter
     if "childEvent" in vars(target):
         target.childEvent = wrap(target.childEvent, on_child_event, "before")
     else:
@@ -321,7 +310,8 @@ def install_filters() -> None:
 
 def add_event_filter(object: QObject, master: AnkiWebView) -> None:
     """Add event filter to the widget and its children, to master"""
-    object.installEventFilter(master)
+    # Event filters are activated in the order they are installed.
+    object.installEventFilter(hotmouseEventFilter)
     child_object = object.children()
     for w in child_object:
         add_event_filter(w, master)
@@ -373,6 +363,7 @@ def handle_js_message(
 
 
 manager = HotmouseManager()
+hotmouseEventFilter = HotmouseEventFilter()
 
 mw.addonManager.setWebExports(__name__, r"web/.*(css|js)")
 gui_hooks.main_window_did_init.append(install_event_handlers)  # 2.1.28
