@@ -267,6 +267,12 @@ class HotmouseEventFilter(QObject):
             if event.type() == QEvent.Type.MouseButtonPress:
                 if manager.on_mouse_press(event):
                     return True
+            elif event.type() == QEvent.Type.MouseButtonRelease:
+                if manager.enabled:
+                    btn = Button(event.button())
+                    # Prevent back/forward navigation
+                    if btn == Button.xbutton1 or btn == Button.xbutton2:
+                        return True
             elif event.type() == QEvent.Type.Wheel:
                 if manager.on_mouse_scroll(event):
                     return True
