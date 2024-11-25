@@ -273,38 +273,23 @@ class HotmouseEventFilter(QObject):
             elif event.type() == QEvent.Type.ContextMenu:
                 if manager.enabled:
                     return True  # ignore event
+        if event.type() == QEvent.Type.ChildAdded:
+            add_event_filter(event.child())
         return False
 
 
-def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
-    if target not in WEBVIEW_TARGETS():
-        return
-    if event.added():
-        add_event_filter(event.child(), target)
-
-
-@no_type_check
-def install_filters() -> None:
-    target = AnkiWebView
-    if "childEvent" in vars(target):
-        target.childEvent = wrap(target.childEvent, on_child_event, "before")
-    else:
-        target.childEvent = on_child_event
-
-
-def add_event_filter(object: QObject, master: AnkiWebView) -> None:
+def add_event_filter(object: QObject) -> None:
     """Add event filter to the widget and its children, to master"""
     # Event filters are activated in the order they are installed.
     object.installEventFilter(hotmouseEventFilter)
     child_object = object.children()
     for w in child_object:
-        add_event_filter(w, master)
+        add_event_filter(w)
 
 
 def install_event_handlers() -> None:
-    install_filters()
     for target in WEBVIEW_TARGETS():
-        add_event_filter(target, target)
+        add_event_filter(target)
 
 
 def add_context_menu_action(wv: AnkiWebView, m: QMenu) -> None:
