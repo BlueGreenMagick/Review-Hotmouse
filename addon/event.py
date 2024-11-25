@@ -23,6 +23,7 @@ config = mw.addonManager.getConfig(__name__)
 def refresh_config() -> None:
     global config
     config = mw.addonManager.getConfig(__name__)
+    manager.refresh_shortcuts()
 
 
 def turn_on() -> None:
@@ -144,10 +145,13 @@ class WheelDir(Enum):
 
 
 class HotmouseManager:
+    has_wheel_hotkey: bool
+
     def __init__(self) -> None:
         self.enabled = config["default_enabled"]
         self.last_scroll_time = datetime.datetime.now()
         self.add_menu()
+        self.refresh_shortcuts()
 
     def add_menu(self) -> None:
         self.action = QAction("Enable/Disable Review Hotmouse", mw)
@@ -169,6 +173,14 @@ class HotmouseManager:
     def disable(self) -> None:
         self.enabled = False
         self.update_menu()
+
+    def refresh_shortcuts(self) -> None:
+        self.has_wheel_hotkey = False
+        for shortcut in config["shortcuts"]:
+            if "wheel" in shortcut:
+                self.has_wheel_hotkey = True
+                break
+        print("has wheel", self.has_wheel_hotkey)
 
     @staticmethod
     def get_pressed_buttons(qbuttons: "Qt.MouseButton") -> List[Button]:
@@ -274,7 +286,7 @@ class HotmouseEventFilter(QObject):
                     if btn == Button.xbutton1 or btn == Button.xbutton2:
                         return True
             elif event.type() == QEvent.Type.Wheel:
-                if manager.on_mouse_scroll(event):
+                if manager.has_wheel_hotkey and manager.on_mouse_scroll(event):
                     return True
             elif event.type() == QEvent.Type.ContextMenu:
                 if manager.enabled:
