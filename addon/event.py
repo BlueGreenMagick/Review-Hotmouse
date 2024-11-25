@@ -268,6 +268,7 @@ class HotmouseManager:
 
 
 class HotmouseEventFilter(QObject):
+    @no_type_check
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
         """Because Mouse events are triggered on QWebEngineView's child widgets.
 
