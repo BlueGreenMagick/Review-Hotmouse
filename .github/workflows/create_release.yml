@@ -35,10 +35,12 @@ jobs:
       - name: Run new_version.py
         run: python new_version.py ${{ github.event.inputs.version }} ${{ env.ADDON_ROOT }}
 
-      - name: Commit changes to git
-        uses: EndBug/add-and-commit@v7.1.1
+      - name: Push new version with tag
+        uses: ad-m/github-push-action@v0.6.0
         with:
-          message: Bump version to v${{ github.event.inputs.version }}
+          github_token: ${{ github.token }}
+          branch: master
+          tags: ${{ github.event.inputs.version }}
 
       - name: Bundle files into addon root
         run: cp ${{ env.BUNDLE_FILES }} ${{ env.ADDON_ROOT }}
@@ -51,7 +53,7 @@ jobs:
           cd "$base_path"
 
       - name: Create github release and upload ankiaddon file
-        uses: svenstaro/upload-release-action@2.2.1
+        uses: svenstaro/upload-release-action@2.9.0
         with:
           repo_token: ${{ github.token }}
           file: ${{ env.ADDON_FILE_NAME }}
