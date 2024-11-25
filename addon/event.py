@@ -270,6 +270,9 @@ class HotmouseEventFilter(QObject):
             elif event.type() == QEvent.Type.Wheel:
                 if manager.on_mouse_scroll(event):
                     return True
+            elif event.type() == QEvent.Type.ContextMenu:
+                if manager.enabled:
+                    return True  # ignore event
         return False
 
 
@@ -280,19 +283,6 @@ def on_child_event(target: AnkiWebView, event: QChildEvent) -> None:
         add_event_filter(event.child(), target)
 
 
-def on_context_menu(
-    target: QWebEngineView,
-    ev: QContextMenuEvent,
-    _old: Callable = lambda t, e: None,
-) -> None:
-    if target not in WEBVIEW_TARGETS():
-        _old(target, ev)
-        return
-    if manager.enabled and mw.state == "review":
-        return None  # ignore event
-    _old(target, ev)
-
-
 @no_type_check
 def install_filters() -> None:
     target = AnkiWebView
@@ -300,12 +290,6 @@ def install_filters() -> None:
         target.childEvent = wrap(target.childEvent, on_child_event, "before")
     else:
         target.childEvent = on_child_event
-    if "contextMenuEvent" in vars(target):
-        target.contextMenuEvent = wrap(
-            target.contextMenuEvent, on_context_menu, "around"
-        )
-    else:
-        target.contextMenuEvent = on_context_menu
 
 
 def add_event_filter(object: QObject, master: AnkiWebView) -> None:
