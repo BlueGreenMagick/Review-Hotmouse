@@ -306,6 +306,7 @@ def add_event_filter(object: QObject) -> None:
         add_event_filter(w)
 
 
+@no_type_check
 def install_event_handlers() -> None:
     for target in WEBVIEW_TARGETS():
         add_event_filter(target)
