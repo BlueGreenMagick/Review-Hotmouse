@@ -309,6 +309,26 @@ def add_event_filter(object: QObject) -> None:
 def install_event_handlers() -> None:
     for target in WEBVIEW_TARGETS():
         add_event_filter(target)
+    # Not sure why, but context menu events are not 100% filtered through event filters
+    if hasattr(AnkiWebView, "contextMenuEvent"):
+        AnkiWebView.contextMenuEvent = wrap(
+            AnkiWebView.contextMenuEvent, on_context_menu, "around"
+        )
+    else:
+        AnkiWebView.contextMenuEvent = on_context_menu
+
+
+def on_context_menu(
+    target: QWebEngineView,
+    ev: QContextMenuEvent,
+    _old: Callable = lambda t, e: None,
+) -> None:
+    if target not in WEBVIEW_TARGETS():
+        _old(target, ev)
+        return
+    if manager.enabled and mw.state == "review":
+        return None  # ignore event
+    _old(target, ev)
 
 
 def add_context_menu_action(wv: AnkiWebView, m: QMenu) -> None:
