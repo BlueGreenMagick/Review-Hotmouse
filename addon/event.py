@@ -182,6 +182,12 @@ class HotmouseManager:
                 break
         print("has wheel", self.has_wheel_hotkey)
 
+    def uses_btn(self, btn: Button) -> bool:
+        for shortcut in config["shortcuts"]:
+            if btn.name in shortcut:
+                return True
+        return False
+
     @staticmethod
     def get_pressed_buttons(qbuttons: "Qt.MouseButton") -> List[Button]:
         """Returns list of pressed button names, excluding the button that caused the trigger"""
@@ -285,12 +291,13 @@ class HotmouseEventFilter(QObject):
                     btn = Button(event.button())
                     # Prevent back/forward navigation
                     if btn == Button.xbutton1 or btn == Button.xbutton2:
-                        return True
+                        if manager.uses_btn(btn):
+                            return True
             elif event.type() == QEvent.Type.Wheel:
                 if manager.has_wheel_hotkey and manager.on_mouse_scroll(event):
                     return True
             elif event.type() == QEvent.Type.ContextMenu:
-                if manager.enabled:
+                if manager.enabled and manager.uses_btn(Button.right):
                     return True  # ignore event
         if event.type() == QEvent.Type.ChildAdded:
             add_event_filter(event.child())
@@ -327,7 +334,7 @@ def on_context_menu(
     if target not in WEBVIEW_TARGETS():
         _old(target, ev)
         return
-    if manager.enabled and mw.state == "review":
+    if manager.enabled and mw.state == "review" and manager.uses_btn(Button.right):
         return None  # ignore event
     _old(target, ev)
 
