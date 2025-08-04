@@ -62,7 +62,7 @@ def modify_empty_action_shortcuts(shortcuts: Dict[str, str]) -> None:
 
 
 def modify_hotkeys_ending_with_press(
-    shortcuts: Dict[str, str]
+    shortcuts: Dict[str, str],
 ) -> Tuple[Dict[str, str], Dict[str, str]]:
     """Modifies hotkeys ending with "press" to "click". Returns modified.
 
