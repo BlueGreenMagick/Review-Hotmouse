@@ -107,6 +107,7 @@ ACTIONS = {
     "audio": lambda: mw.reviewer.replayAudio(),
     "record_voice": lambda: mw.reviewer.onRecordVoice(),
     "replay_voice": lambda: mw.reviewer.onReplayRecorded(),
+    "toggle_auto_advance": lambda: mw.reviewer.toggle_auto_advance(),
 }
 ACTION_OPTS = list(ACTIONS.keys())
 
