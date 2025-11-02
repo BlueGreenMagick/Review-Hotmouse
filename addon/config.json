@@ -9,8 +9,7 @@
         "a_wheel_down": "good",
         "a_press_middle_wheel_up": "hard",
         "a_press_middle_wheel_down": "easy",
-        "q_click_middle": "toggle_auto_advance",
-        "a_click_middle": "toggle_auto_advance"
+        "q_click_middle": "toggle_auto_advance"
     },
     "default_enabled": true,
     "threshold_wheel_ms": 350,
