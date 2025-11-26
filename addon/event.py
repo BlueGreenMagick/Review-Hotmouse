@@ -287,7 +287,7 @@ class HotmouseEventFilter(QObject):
                 if manager.on_mouse_press(event):
                     return True
             elif event.type() == QEvent.Type.MouseButtonRelease:
-                if manager.enabled:
+                if manager.enabled and event.button() != Qt.MouseButton.NoButton:
                     btn = Button(event.button())
                     # Prevent back/forward navigation
                     if btn == Button.xbutton1 or btn == Button.xbutton2:
