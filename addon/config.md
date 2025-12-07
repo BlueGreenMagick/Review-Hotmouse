@@ -62,3 +62,5 @@ When shortcut has multiple `press\_button`s, the buttons must be in the same ord
 - `record_voice`
 - `replay_voice`
 - `toggle_auto_advance`
+- `copy`
+- `paste`
