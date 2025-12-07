@@ -83,6 +83,16 @@ def answer_easy() -> None:
         mw.reviewer._answerCard(4)
 
 
+def toggle_auto_advance() -> None:
+    # This method was added v23.12
+    if hasattr(mw.reviewer, "toggle_auto_advance"):
+        mw.reviewer.toggle_auto_advance()
+    else:
+        tooltip(
+            "Review Hotmouse: Your Anki version does not support 'toggle_auto_advance'"
+        )
+
+
 ACTIONS = {
     "<none>": lambda: None,
     "on": turn_on,
@@ -107,7 +117,7 @@ ACTIONS = {
     "audio": lambda: mw.reviewer.replayAudio(),
     "record_voice": lambda: mw.reviewer.onRecordVoice(),
     "replay_voice": lambda: mw.reviewer.onReplayRecorded(),
-    "toggle_auto_advance": lambda: mw.reviewer.toggle_auto_advance(),
+    "toggle_auto_advance": toggle_auto_advance,
 }
 ACTION_OPTS = list(ACTIONS.keys())
 
