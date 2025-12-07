@@ -129,6 +129,14 @@ class Button(Enum):
     xbutton1 = Qt.MouseButton.XButton1
     xbutton2 = Qt.MouseButton.XButton2
 
+    @classmethod
+    def from_qt(cls, btn: Qt.MouseButton) -> Optional["Button"]:
+        try:
+            return Button(btn)
+        except ValueError:
+            print(f"Review Hotmouse: Unknown Button Pressed: {btn}")
+            return None
+
 
 class WheelDir(Enum):
     DOWN = -1
@@ -254,13 +262,10 @@ class HotmouseManager:
     def on_mouse_press(self, event: QMouseEvent) -> bool:
         """Returns True if shortcut is executed"""
         btns = self.get_pressed_buttons(event.buttons())
-        btn = event.button()
-        try:
-            pressed = Button(event.button())
-            btns.remove(pressed)
-        except ValueError:  # Ignore unknown button
-            print(f"Review Hotmouse: Unknown Button Pressed: {btn}")
+        pressed = Button.from_qt(event.button())
+        if pressed is None:
             return False
+        btns.remove(pressed)
         hotkey_str = self.build_hotkey(btns, click=pressed)
         return self.execute_shortcut(hotkey_str)
 
@@ -299,7 +304,9 @@ class HotmouseEventFilter(QObject):
                     return True
             elif event.type() == QEvent.Type.MouseButtonRelease:
                 if manager.enabled:
-                    btn = Button(event.button())
+                    btn = Button.from_qt(event.button())
+                    if btn is None:
+                        return False
                     # Prevent back/forward navigation
                     if btn == Button.xbutton1 or btn == Button.xbutton2:
                         if manager.uses_btn(btn):
