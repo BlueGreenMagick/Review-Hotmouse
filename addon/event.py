@@ -117,6 +117,7 @@ ACTIONS = {
     "audio": lambda: mw.reviewer.replayAudio(),
     "record_voice": lambda: mw.reviewer.onRecordVoice(),
     "replay_voice": lambda: mw.reviewer.onReplayRecorded(),
+    "replay_audio": lambda: mw.reviewer.replayAudio(),
     "toggle_auto_advance": toggle_auto_advance,
     "copy": lambda: mw.reviewer.web.triggerPageAction(QWebEnginePage.WebAction.Copy),
     "paste": lambda: mw.reviewer.web.triggerPageAction(QWebEnginePage.WebAction.Paste),
