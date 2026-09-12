@@ -1,8 +1,6 @@
-Use <b>mouse shortcuts</b> to review comfortably.
+Use <b>mouse shortcuts</b> to review comfortably. <b>Scroll down</b> to <i>show answer</i>, then <b>scroll up</b> to <i>answer again</i>
 
-<b>scroll down</b> to <i>show answer</i>, <b>scroll up</b> to answer 'again'.
-
-<b>How to use</b>
+<h3>How to use</h3>
 
 Below is the default configuration:
 - scroll down: Show Answer (front), Answer good (back)
@@ -14,7 +12,7 @@ Below is the default configuration:
 
 You can customize the mouse shortcuts in the add-on config. This add-on provides 20+ actions that can be mapped to any mouse shortcuts.
 
-<b>How It Works & Customizing Hotkeys</b>
+<h3>How It Works & Customizing Hotkeys</h3>
 
 A hotkey is comprised of mouse press and mouse wheel events. When you press a
 mouse button (mousedown), the add-on searches for a hotkey where all the buttons you pressed
@@ -24,12 +22,13 @@ for a hotkey where all the buttons that are being pressed are written as 'press
 [button name]' and the scroll direction as 'wheel [direction]'. If such hotkey
 exists, its corresponding action is executed.
 
-<b>Notes</b>
+<h3>Tips</h3>
+
 - If you need to scroll through a long card, you can do it by pressing left mouse button while scrolling.
-- Tip: Connect your laptop to a TV, and review with a wireless mouse while exercising.
+- Connect your laptop to a TV, and you can review with a wireless mouse while exercising.
 - This add-on pairs well with <a href="https://ankiweb.net/shared/info/231569866">Audiovisual Feedback</a> add-on. Try it out!
 
-<b>Additional Links</b>
+<h3>Additional Links</h3>
 
 <a href="https://ankiweb.net/shared/info/1928346827">Ankiweb</a> 
 - <a href="https://github.com/BlueGreenMagick/Review-Hotmouse/">Github</a>
