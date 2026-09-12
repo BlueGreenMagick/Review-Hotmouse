@@ -302,7 +302,11 @@ class HotmouseEventFilter(QObject):
         And `left_click` shortcut should be discouraged because of above.
         """
         if mw.state == "review":
-            if event.type() == QEvent.Type.MouseButtonPress:
+            # Qt reports the second press of a double-click as MouseButtonDblClick.
+            if event.type() in (
+                QEvent.Type.MouseButtonPress,
+                QEvent.Type.MouseButtonDblClick,
+            ):
                 if manager.on_mouse_press(event):
                     return True
             elif event.type() == QEvent.Type.MouseButtonRelease:
