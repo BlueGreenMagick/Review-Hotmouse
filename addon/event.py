@@ -284,12 +284,15 @@ class HotmouseManager:
         curr_time = datetime.datetime.now()
         time_diff = curr_time - self.last_scroll_time
         self.last_scroll_time = curr_time
+        btns = self.get_pressed_buttons(qbtns)
+        hotkey_str = self.build_hotkey(btns, wheel=wheel_dir)
         if time_diff.total_seconds() * 1000 > config["threshold_wheel_ms"]:
-            btns = self.get_pressed_buttons(qbtns)
-            hotkey_str = self.build_hotkey(btns, wheel=wheel_dir)
             return self.execute_shortcut(hotkey_str)
-        else:
-            return self.enabled
+
+        # Consume debounced wheel events only when this exact combination is
+        # configured. Otherwise, let the event continue to the reviewer so
+        # ordinary scrolling is not interrupted.
+        return self.enabled and hotkey_str in config["shortcuts"]
 
 
 class HotmouseEventFilter(QObject):
